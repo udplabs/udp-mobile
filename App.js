@@ -24,13 +24,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logo:{
+  logo: {
     fontWeight:"bold",
     fontSize:50,
     color:"#fb5b5a",
     marginBottom:40
   },
-  inputView:{
+  inputView: {
     width:"80%",
     backgroundColor:"#465881",
     borderRadius:25,
@@ -39,15 +39,15 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     padding:20
   },
-  inputText:{
+  inputText: {
     height:50,
     color:"white"
   },
-  forgot:{
+  forgot: {
     color:"white",
     fontSize:11
   },
-  loginBtn:{
+  loginBtn: {
     width:"80%",
     backgroundColor:"#fb5b5a",
     borderRadius:25,
