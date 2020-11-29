@@ -8,11 +8,8 @@ import Paragraph from '../components/Paragraph';
 const HomeScreen = ({ navigation }) => (
   <Background>
     <Logo />
-    <Header>Login Template</Header>
+    <Header>UDP Mobile</Header>
 
-    <Paragraph>
-      The easiest way to start with your amazing application.
-    </Paragraph>
     <Button mode="contained" onPress={() => navigation.navigate('LoginScreen')}>
       Login
     </Button>
