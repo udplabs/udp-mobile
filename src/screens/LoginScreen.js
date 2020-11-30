@@ -1,6 +1,8 @@
 import React, { memo, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
 import Background from '../components/Background';
+import { signIn, EventEmitter } from '@okta/okta-react-native';
+
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
@@ -22,8 +24,13 @@ const LoginScreen = ({ navigation }) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
-
-    navigation.navigate('Dashboard');
+    signIn({ username: email, password })
+      .then(token => {
+        navigation.navigate('Dashboard');
+      })
+      .catch(error => {
+        console.log(error);
+      })
   };
 
   return (
