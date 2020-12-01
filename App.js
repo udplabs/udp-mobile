@@ -42,7 +42,7 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={authenticated ? 'Profile' : 'Home'}>
+      <Stack.Navigator initialRouteName={authenticated ? 'Profile' : 'Home'} headerMode={false}>
         <Stack.Screen 
           name="Home" 
           component={HomeScreen} 
