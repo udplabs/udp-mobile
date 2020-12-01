@@ -16,7 +16,7 @@ import { View, Text, SafeAreaView } from 'react-native';
 import { isAuthenticated } from '@okta/okta-react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './app/LoginScreen.js';
+import LoginScreen from './src/screens/LoginScreen.js';
 import ProfileScreen from './app/ProfileScreen.js';
 
 const Stack = createStackNavigator();
