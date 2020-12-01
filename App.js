@@ -54,6 +54,21 @@ const App = () => {
           options={{ title: 'Login', headerLeft: null }} 
         />
         <Stack.Screen 
+          name="Register" 
+          component={RegisterScreen} 
+          options={{ title: 'Register', headerLeft: null }} 
+        />
+        <Stack.Screen 
+          name="ForgotPassword" 
+          component={ForgotPasswordScreen} 
+          options={{ title: 'ForgotPassword', headerLeft: null }} 
+        />
+        <Stack.Screen 
+          name="Dashboard" 
+          component={Dashboard} 
+          options={{ title: 'Dashboard', headerLeft: null }} 
+        />
+        <Stack.Screen 
           name="Profile" 
           component={ProfileScreen} 
           options={{ title: 'User Profile'}} 
