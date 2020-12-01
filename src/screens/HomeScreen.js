@@ -10,7 +10,7 @@ const HomeScreen = ({ navigation }) => (
     <Logo />
     <Header>UDP Mobile</Header>
 
-    <Button mode="contained" onPress={() => navigation.navigate('LoginScreen')}>
+    <Button mode="contained" onPress={() => navigation.navigate('Login')}>
       Login
     </Button>
     <Button

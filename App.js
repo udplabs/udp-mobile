@@ -1,23 +1,17 @@
-/*
- * Copyright (c) 2019, Okta, Inc. and/or its affiliates. All rights reserved.
- * The Okta software accompanied by this notice is provided pursuant to the Apache License, Version 2.0 (the "License.")
- *
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *
- * See the License for the specific language governing permissions and limitations under the License.
- */
-
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView } from 'react-native';
 import { isAuthenticated } from '@okta/okta-react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './src/screens/LoginScreen.js';
-import ProfileScreen from './app/ProfileScreen.js';
+import {
+  HomeScreen,
+  LoginScreen,
+  RegisterScreen,
+  ForgotPasswordScreen,
+  Dashboard,
+  ProfileScreen,
+} from './src/screens';
 
 const Stack = createStackNavigator();
 
@@ -48,7 +42,12 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={authenticated ? 'Profile' : 'Login'}>
+      <Stack.Navigator initialRouteName={authenticated ? 'Profile' : 'Home'}>
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+          options={{ title: 'Home', headerLeft: null }} 
+        />
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
