@@ -13,10 +13,10 @@
 export default {
   oidc: {
     clientId: '0oavf6s8badHjoMgT0h7',
-    discoveryUri: 'https://dev-1234.oktapreview.com/oauth2/default', 
-    redirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/callback', // com.oktapreview.dev-1234:/callback
-    endSessionRedirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/', // com.oktapreview.dev-1234:/logoutCallback
-    scopes: ["openid", "profile", "offline_access", "signin"],
+    discoveryUri: 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/default',
+    redirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/callback',
+    endSessionRedirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/callback',
+    scopes: ["openid", "profile", "offline_access"],
     requireHardwareBackedKeyStore: false
   }
 };
