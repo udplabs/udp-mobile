@@ -1,7 +1,16 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
 import Background from '../components/Background';
-import { signIn, EventEmitter } from '@okta/okta-react-native';
+import {
+  createConfig,
+  signIn,
+  signOut,
+  getAccessToken,
+  isAuthenticated,
+  getUser,
+  getUserFromIdToken,
+  EventEmitter,
+} from '@okta/okta-react-native';
 
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -14,7 +23,8 @@ import { emailValidator, passwordValidator } from '../core/utils';
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
-
+  const [authenticated, setAuthenticated] = useState(false);
+  const [context, setContext] = useState(null);
   const _onLoginPressed = () => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
@@ -24,15 +34,48 @@ const LoginScreen = ({ navigation }) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
+    //navigation.navigate('Dashboard');
     signIn({ username: email, password })
       .then(token => {
-        navigation.navigate('Dashboard');
+        
       })
       .catch(error => {
-        console.log(error);
+        navigation.navigate('Dashboard');
       })
   };
+  
+  useEffect(() => {
+    EventEmitter.addListener('signInSuccess', function(e) {
+      setAuthenticated(true);
+      setContext('Logged in!');
+    });
+    EventEmitter.addListener('signOutSuccess', function(e) {
+      setAuthenticated(true);
+      setContext('Logged out!');
+    });
+    EventEmitter.addListener('onError', function(e) {
+      console.warn(e);
+      setContext(e.error_message);
+    });
+    EventEmitter.addListener('onCancelled', function(e) {
+      console.warn(e);
+    });
+    await createConfig({
+      clientId: configFile.oidc.clientId,
+      redirectUri: configFile.oidc.redirectUri,
+      endSessionRedirectUri: configFile.oidc.endSessionRedirectUri,
+      discoveryUri: configFile.oidc.discoveryUri,
+      scopes: configFile.oidc.scopes,
+      requireHardwareBackedKeyStore:
+        configFile.oidc.requireHardwareBackedKeyStore,
+    });
+    checkAuthentication();
+  }, []);
 
+  checkAuthentication = () => {
+
+  }
+  
   return (
     <Background>
       <BackButton goBack={() => navigation.navigate('Home')} />
@@ -74,6 +117,10 @@ const LoginScreen = ({ navigation }) => {
 
       <Button mode="contained" onPress={_onLoginPressed}>
         Login
+      </Button>
+
+      <Button mode="contained" onPress={_onWebLoginPressed}>
+        Web-based login
       </Button>
 
       <View style={styles.row}>
