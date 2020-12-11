@@ -44,6 +44,10 @@ const LoginScreen = ({ navigation }) => {
       })
   };
   
+  _onWebLoginPressed = () => {
+    signIn();
+  }
+
   useEffect(() => {
     EventEmitter.addListener('signInSuccess', function(e) {
       setAuthenticated(true);
@@ -60,22 +64,20 @@ const LoginScreen = ({ navigation }) => {
     EventEmitter.addListener('onCancelled', function(e) {
       console.warn(e);
     });
-    await createConfig({
-      clientId: configFile.oidc.clientId,
-      redirectUri: configFile.oidc.redirectUri,
-      endSessionRedirectUri: configFile.oidc.endSessionRedirectUri,
-      discoveryUri: configFile.oidc.discoveryUri,
-      scopes: configFile.oidc.scopes,
-      requireHardwareBackedKeyStore:
-        configFile.oidc.requireHardwareBackedKeyStore,
-    });
+   
     checkAuthentication();
+    return () => {
+      EventEmitter.removeAllListeners('signInSuccess');
+      EventEmitter.removeAllListeners('signOutSuccess');
+      EventEmitter.removeAllListeners('onError');
+      EventEmitter.removeAllListeners('onCancelled');
+    };
   }, []);
 
   checkAuthentication = () => {
 
   }
-  
+
   return (
     <Background>
       <BackButton goBack={() => navigation.navigate('Home')} />
