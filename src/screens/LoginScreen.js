@@ -40,7 +40,6 @@ const LoginScreen = ({ navigation }) => {
         
       })
       .catch(error => {
-        navigation.navigate('Dashboard');
       })
   };
   
@@ -51,6 +50,7 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     EventEmitter.addListener('signInSuccess', function(e) {
       setAuthenticated(true);
+      navigation.navigate('Dashboard');
       setContext('Logged in!');
     });
     EventEmitter.addListener('signOutSuccess', function(e) {
@@ -74,8 +74,19 @@ const LoginScreen = ({ navigation }) => {
     };
   }, []);
 
-  checkAuthentication = () => {
+  checkAuthentication = async () => {
+    const result = await isAuthenticated();
+    if (result.authenticated !== authenticated) {
+      setAuthenticated(result.authenticated);
+    }
+  }
 
+  getUserIdToken = async () => {
+    let user = await getUserFromIdToken();
+    setContext(`
+      User Profile:
+      ${JSON.stringify(user, null, 4)}
+    `);
   }
 
   return (

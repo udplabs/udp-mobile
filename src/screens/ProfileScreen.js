@@ -27,11 +27,6 @@ export class ProfileScreen extends React.Component {
   }
 
   componentDidMount() {
-    this.props.navigation.setOptions({
-      headerLeft: () => 
-        <Text onPress={this.logout} style={styles.logoutButton}>Logout</Text>
-    });
-
     this.setState({ progress: true });
     getUser()
       .then(user => {
@@ -94,6 +89,7 @@ export class ProfileScreen extends React.Component {
                 <Text>Zone Info: </Text>
                 <Text>{user.zoneinfo}</Text>
               </View>
+              <Text onPress={this.logout} style={styles.logoutButton}>Logout</Text>
             </View>
           )}
           <View style={{ flexDirection: 'column', marginTop: 20, paddingLeft: 20, width: 300 }}>
