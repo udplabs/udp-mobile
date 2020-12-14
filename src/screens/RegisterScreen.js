@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -53,13 +53,25 @@ const RegisterScreen = ({ navigation }) => {
         'Authorization': `SSWS ${configFile.token}`
       }
     })
-      .then(response=>{
-        alert('A new user has been registered!')
-        navigation.navigate('Login');
+      .then(response => {
+        Alert.alert(
+          'Signup',
+          'You have signed up successfully. Please login to continue.',
+          [
+            { text: 'OK', onPress: () => navigation.navigate('Login') }
+          ],
+          { cancelable: false }
+        );
       }
       ,(error) => {
-        alert('An error has occured, please try again.')
-        console.log('err', error.message);
+        Alert.alert(
+          'Error',
+          'An error has occured, please try again.',
+          [
+            { text: 'OK', onPress: () => console.log('error', error.message) }
+          ],
+          { cancelable: false }
+        );
       })
   };
 

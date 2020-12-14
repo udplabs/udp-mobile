@@ -58,7 +58,7 @@ export class ProfileScreen extends React.Component {
           CommonActions.reset({
             index: 0,
             routes: [
-              { name: 'Login' },
+              { name: 'Home' },
             ],
           })
           );

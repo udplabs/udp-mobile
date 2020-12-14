@@ -30,12 +30,13 @@ const LoginScreen = ({ navigation }) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
-    //navigation.navigate('Dashboard');
-    signIn({ username: email, password })
+
+    signIn({ username: email.value, password: password.value })
       .then(token => {
         navigation.navigate('Profile');
       })
       .catch(error => {
+        console.log('login error', error);
       })
   };
   
@@ -127,7 +128,7 @@ const LoginScreen = ({ navigation }) => {
       </Button>
 
       <Button mode="contained" onPress={_onWebLoginPressed}>
-        Web-based login
+        Login via webpage
       </Button>
 
       <View style={styles.row}>
