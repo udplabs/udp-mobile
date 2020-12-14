@@ -20,4 +20,5 @@ export default {
     requireHardwareBackedKeyStore: false
   },
   baseUri: 'https://udp-udp-mobile-6aa.oktapreview.com/api/v1',
+  token: '00zWLiJ7348L8gqRt2lYxJiQ5qTHF57VtQ7fXKHXit',
 };

@@ -36,23 +36,30 @@ const RegisterScreen = ({ navigation }) => {
     }
     axios.post(`${configFile.baseUri}/users?activate=true`, {
       profile: {
-        firstName,
-        lastName,
-        email,
-        login: email,
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: email.value,
+        login: email.value,
       },
       credentials: {
         password: {
-          value: password,
+          value: password.value,
         }
+      }
+    }, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `SSWS ${configFile.token}`
       }
     })
       .then(response=>{
-        const { data } = response;
+        alert('A new user has been registered!')
         navigation.navigate('Login');
       }
       ,(error) => {
-        console.log('err', error);
+        alert('An error has occured, please try again.')
+        console.log('err', error.message);
       })
   };
 
