@@ -1,14 +1,16 @@
 ﻿import React from 'react';
 import {
-  SafeAreaView,
+  TouchableOpacity,
   StyleSheet,
   Text,
   View,
-  StatusBar,
   Button
 } from 'react-native';
 import { getAccessToken, getUser, clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { CommonActions } from '@react-navigation/native';
+
+import Background from '../components/Background';
 import Error from '../components/Error';
 
 export class ProfileScreen extends React.Component {
@@ -21,9 +23,6 @@ export class ProfileScreen extends React.Component {
       progress: true,
       error: ''
     };
-
-    this.logout = this.logout.bind(this);
-    this.getAccessToken = this.getAccessToken.bind(this);
   }
 
   componentDidMount() {
@@ -37,7 +36,7 @@ export class ProfileScreen extends React.Component {
       });
   }
 
-  getAccessToken() {
+  getAccessToken = () => {
     this.setState({ progress: false });
     getAccessToken()
       .then(token => {
@@ -51,11 +50,19 @@ export class ProfileScreen extends React.Component {
       })
   }
 
-  logout() {
+  logout = () => {
+    const { navigation } = this.props;
     clearTokens()
       .then(() => {
-        this.props.navigation.navigate('Login');
-      })
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              { name: 'Login' },
+            ],
+          })
+          );
+        })
       .catch(e => {
         this.setState({ error: e.message })
       });
@@ -65,44 +72,33 @@ export class ProfileScreen extends React.Component {
     const { user, accessToken, error, progress } = this.state;
 
     return (
-      <>
-        <StatusBar barStyle="dark-content" />
-        <SafeAreaView style={styles.container}>
-          <Spinner
-            visible={progress}
-            textContent={'Loading...'}
-            textStyle={styles.spinnerTextStyle}
-          />
-          <Error error={error} />
-          { user && (
-            <View style={{ paddingLeft: 20, paddingTop: 20 }}>
-              <Text style={styles.titleHello}>Hello {user.name}</Text>
-              <View style={{ flexDirection: 'row' }}>
-                <Text>Name: </Text>
-                <Text>{user.name}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <Text>Locale: </Text>
-                <Text>{user.locale}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <Text>Zone Info: </Text>
-                <Text>{user.zoneinfo}</Text>
-              </View>
-              <Text onPress={this.logout} style={styles.logoutButton}>Logout</Text>
-            </View>
-          )}
-          <View style={{ flexDirection: 'column', marginTop: 20, paddingLeft: 20, width: 300 }}>
-            <Button style={{ marginTop:40 }} title="Get access token" onPress={this.getAccessToken} />
-            { accessToken &&
-              <View style={styles.tokenContainer}>
-                <Text style={styles.tokenTitle}>Access Token:</Text>
-                <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
-              </View>
-            }
+      <Background>
+        <Spinner
+          visible={progress}
+          textContent={'Loading...'}
+          textStyle={styles.spinnerTextStyle}
+        />
+        <Error error={error} />
+        { user && (
+          <View style={{ paddingLeft: 20, paddingTop: 20 }}>
+            <Text style={styles.titleHello}>Welcome {user.name}</Text>
           </View>
-        </SafeAreaView>
-      </>
+        )}
+        <View style={{ flexDirection: 'column', marginTop: 20, paddingLeft: 20, width: 300 }}>
+          <Button style={{ marginTop:40 }} title="Get access token" onPress={this.getAccessToken} />
+          { accessToken &&
+            <View style={styles.tokenContainer}>
+              <Text style={styles.tokenTitle}>Access Token:</Text>
+              <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
+            </View>
+          }
+        </View>
+        <View style={styles.row}>
+          <TouchableOpacity onPress={this.logout}>
+            <Text onPress={this.logout} style={styles.logoutButton}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </Background>
     );
   }
 }
@@ -110,14 +106,6 @@ export class ProfileScreen extends React.Component {
 const styles = StyleSheet.create({
   spinnerTextStyle: {
     color: '#FFF',
-  },
-  button: {
-    borderRadius: 40,
-    width: 200,
-    height: 40,
-    marginTop: 40,
-    marginBottom: 10,
-    marginHorizontal: 10,
   },
   logoutButton: {
     paddingLeft: 10,
@@ -127,7 +115,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    backgroundColor: '#FFFFFF',
   },
   titleHello: {
     fontSize: 20,

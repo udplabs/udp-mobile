@@ -2,12 +2,8 @@ import React, { memo, useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
 import Background from '../components/Background';
 import {
-  createConfig,
   signIn,
-  signOut,
-  getAccessToken,
   isAuthenticated,
-  getUser,
   getUserFromIdToken,
   EventEmitter,
 } from '@okta/okta-react-native';
@@ -37,7 +33,7 @@ const LoginScreen = ({ navigation }) => {
     //navigation.navigate('Dashboard');
     signIn({ username: email, password })
       .then(token => {
-        
+        navigation.navigate('Profile');
       })
       .catch(error => {
       })
@@ -50,7 +46,7 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     EventEmitter.addListener('signInSuccess', function(e) {
       setAuthenticated(true);
-      navigation.navigate('Dashboard');
+      navigation.navigate('Profile');
       setContext('Logged in!');
     });
     EventEmitter.addListener('signOutSuccess', function(e) {
@@ -92,10 +88,8 @@ const LoginScreen = ({ navigation }) => {
   return (
     <Background>
       <BackButton goBack={() => navigation.navigate('Home')} />
-
       <Logo />
-
-      <Header>Welcome back.</Header>
+      <Header>Welcome back</Header>
 
       <TextInput
         label="Email"
@@ -122,7 +116,7 @@ const LoginScreen = ({ navigation }) => {
 
       <View style={styles.forgotPassword}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('ForgotPasswordScreen')}
+          onPress={() => navigation.navigate('ForgotPassword')}
         >
           <Text style={styles.label}>Forgot your password?</Text>
         </TouchableOpacity>
