@@ -1,5 +1,6 @@
 import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from 'axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -12,25 +13,47 @@ import {
   passwordValidator,
   nameValidator,
 } from '../core/utils';
+import configFile from '../../samples.config'
 
 const RegisterScreen = ({ navigation }) => {
-  const [name, setName] = useState({ value: '', error: '' });
+  const [firstName, setFirstName] = useState({ value: '', error: '' });
+  const [lastName, setLastName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
 
   const _onSignUpPressed = () => {
-    const nameError = nameValidator(name.value);
+    const firstNameError = nameValidator(firstName.value);
+    const lastNameError = nameValidator(lastName.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
 
-    if (emailError || passwordError || nameError) {
-      setName({ ...name, error: nameError });
+    if (emailError || passwordError || firstNameError) {
+      setFirstName({ ...firstName, error: firstNameError });
+      setLastName({ ...lastName, error: lastNameError });
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
       return;
     }
-
-    navigation.navigate('Dashboard');
+    axios.post(`${configFile.baseUri}/users?activate=true`, {
+      profile: {
+        firstName,
+        lastName,
+        email,
+        login: email,
+      },
+      credentials: {
+        password: {
+          value: password,
+        }
+      }
+    })
+      .then(response=>{
+        const { data } = response;
+        navigation.navigate('Login');
+      }
+      ,(error) => {
+        console.log('err', error);
+      })
   };
 
   return (
@@ -40,14 +63,22 @@ const RegisterScreen = ({ navigation }) => {
       <Logo />
 
       <Header>Create Account</Header>
+      <TextInput
+        label="First Name"
+        returnKeyType="next"
+        value={firstName.value}
+        onChangeText={text => setFirstName({ value: text, error: '' })}
+        error={!!firstName.error}
+        errorText={firstName.error}
+      />
 
       <TextInput
-        label="Name"
+        label="Last Name"
         returnKeyType="next"
-        value={name.value}
-        onChangeText={text => setName({ value: text, error: '' })}
-        error={!!name.error}
-        errorText={name.error}
+        value={lastName.value}
+        onChangeText={text => setLastName({ value: text, error: '' })}
+        error={!!lastName.error}
+        errorText={lastName.error}
       />
 
       <TextInput
@@ -79,7 +110,7 @@ const RegisterScreen = ({ navigation }) => {
 
       <View style={styles.row}>
         <Text style={styles.label}>Already have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>Login</Text>
         </TouchableOpacity>
       </View>

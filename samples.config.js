@@ -18,5 +18,6 @@ export default {
     endSessionRedirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/callback',
     scopes: ["openid", "profile", "offline_access"],
     requireHardwareBackedKeyStore: false
-  }
+  },
+  baseUri: 'https://udp-udp-mobile-6aa.oktapreview.com/api/v1',
 };

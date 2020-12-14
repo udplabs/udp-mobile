@@ -20,12 +20,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
       return;
     }
 
-    navigation.navigate('LoginScreen');
+    navigation.navigate('Login');
   };
 
   return (
     <Background>
-      <BackButton goBack={() => navigation.navigate('LoginScreen')} />
+      <BackButton goBack={() => navigation.navigate('Login')} />
 
       <Logo />
 
@@ -50,7 +50,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.back}
-        onPress={() => navigation.navigate('LoginScreen')}
+        onPress={() => navigation.navigate('Login')}
       >
         <Text style={styles.label}>← Back to login</Text>
       </TouchableOpacity>
