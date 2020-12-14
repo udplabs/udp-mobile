@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import axios from 'axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -82,82 +82,89 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <Background>
-      <BackButton goBack={() => navigation.navigate('Home')} />
+      <BackButton goBack={() => navigation.goBack()} />
+      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+        <View style={styles.inputContainer}>
+        <Logo />
 
-      <Logo />
+        <Header>Create Account</Header>
+        <TextInput
+          label="First Name"
+          returnKeyType="next"
+          value={firstName.value}
+          onChangeText={text => setFirstName({ value: text, error: '' })}
+          error={!!firstName.error}
+          errorText={firstName.error}
+        />
 
-      <Header>Create Account</Header>
-      <TextInput
-        label="First Name"
-        returnKeyType="next"
-        value={firstName.value}
-        onChangeText={text => setFirstName({ value: text, error: '' })}
-        error={!!firstName.error}
-        errorText={firstName.error}
-      />
+        <TextInput
+          label="Last Name"
+          returnKeyType="next"
+          value={lastName.value}
+          onChangeText={text => setLastName({ value: text, error: '' })}
+          error={!!lastName.error}
+          errorText={lastName.error}
+        />
 
-      <TextInput
-        label="Last Name"
-        returnKeyType="next"
-        value={lastName.value}
-        onChangeText={text => setLastName({ value: text, error: '' })}
-        error={!!lastName.error}
-        errorText={lastName.error}
-      />
-
-      <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={text => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      />
-       <TextInput
-        keyboardType="numeric"
-        placeholder='Enter mobile number'
-        value={phoneNumber.value}
-        error={!!phoneNumber.error}
-        errorText={phoneNumber.error}
-        onChangeText={(value) => {
-          let num = value.replace(".", '');
-          if(isNaN(num)){
-              // Its not a number
-          }else{
-              setPhoneNumber({ value: num, error: ''})}  
+        <TextInput
+          label="Email"
+          returnKeyType="next"
+          value={email.value}
+          onChangeText={text => setEmail({ value: text, error: '' })}
+          error={!!email.error}
+          errorText={email.error}
+          autoCapitalize="none"
+          autoCompleteType="email"
+          textContentType="emailAddress"
+          keyboardType="email-address"
+        />
+        <TextInput
+          keyboardType="numeric"
+          placeholder='Enter mobile number'
+          value={phoneNumber.value}
+          error={!!phoneNumber.error}
+          errorText={phoneNumber.error}
+          onChangeText={(value) => {
+            let num = value.replace(".", '');
+            if(isNaN(num)){
+                // Its not a number
+            }else{
+                setPhoneNumber({ value: num, error: ''})}  
+            }
           }
-        }
-      />
+        />
 
-      <TextInput
-        label="Password"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={text => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
-        secureTextEntry
-      />
+        <TextInput
+          label="Password"
+          returnKeyType="done"
+          value={password.value}
+          onChangeText={text => setPassword({ value: text, error: '' })}
+          error={!!password.error}
+          errorText={password.error}
+          secureTextEntry
+        />
 
-      <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
-        Sign Up
-      </Button>
+        <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
+          Sign Up
+        </Button>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Already have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.link}>Login</Text>
-        </TouchableOpacity>
+        <View style={styles.row}>
+          <Text style={styles.label}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.link}>Login</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      </ScrollView>
     </Background>
   );
 };
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
   label: {
     color: theme.colors.secondary,
   },
