@@ -12,6 +12,7 @@ import {
   emailValidator,
   passwordValidator,
   nameValidator,
+  phoneNumberValidator,
 } from '../core/utils';
 import configFile from '../../samples.config'
 
@@ -20,18 +21,21 @@ const RegisterScreen = ({ navigation }) => {
   const [lastName, setLastName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
+  const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
 
   const _onSignUpPressed = () => {
     const firstNameError = nameValidator(firstName.value);
     const lastNameError = nameValidator(lastName.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
+    const phoneNumberError = phoneNumberValidator(phoneNumber.value);
 
     if (emailError || passwordError || firstNameError) {
       setFirstName({ ...firstName, error: firstNameError });
       setLastName({ ...lastName, error: lastNameError });
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
+      setPhoneNumber({ ...phoneNumber, error: phoneNumberError });
       return;
     }
     axios.post(`${configFile.baseUri}/users?activate=true`, {
@@ -40,6 +44,7 @@ const RegisterScreen = ({ navigation }) => {
         lastName: lastName.value,
         email: email.value,
         login: email.value,
+        mobilePhone: phoneNumber.value,
       },
       credentials: {
         password: {
@@ -111,6 +116,21 @@ const RegisterScreen = ({ navigation }) => {
         autoCompleteType="email"
         textContentType="emailAddress"
         keyboardType="email-address"
+      />
+       <TextInput
+        keyboardType="numeric"
+        placeholder='Enter mobile number'
+        value={phoneNumber.value}
+        error={!!phoneNumber.error}
+        errorText={phoneNumber.error}
+        onChangeText={(value) => {
+          let num = value.replace(".", '');
+          if(isNaN(num)){
+              // Its not a number
+          }else{
+              setPhoneNumber({ value: num, error: ''})}  
+          }
+        }
       />
 
       <TextInput
