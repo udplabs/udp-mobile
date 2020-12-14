@@ -1,16 +1,15 @@
 ﻿import React from 'react';
 import {
-  TouchableOpacity,
   StyleSheet,
   Text,
   View,
-  Button
 } from 'react-native';
 import { getAccessToken, getUser, clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { CommonActions } from '@react-navigation/native';
-
+import Header from '../components/Header';
 import Background from '../components/Background';
+import Button from '../components/Button';
 import Error from '../components/Error';
 
 export class ProfileScreen extends React.Component {
@@ -73,30 +72,38 @@ export class ProfileScreen extends React.Component {
 
     return (
       <Background>
-        <Spinner
-          visible={progress}
-          textContent={'Loading...'}
-          textStyle={styles.spinnerTextStyle}
-        />
-        <Error error={error} />
-        { user && (
-          <View style={{ paddingLeft: 20, paddingTop: 20 }}>
-            <Text style={styles.titleHello}>Welcome {user.name}</Text>
-          </View>
-        )}
-        <View style={{ flexDirection: 'column', marginTop: 20, paddingLeft: 20, width: 300 }}>
-          <Button style={{ marginTop:40 }} title="Get access token" onPress={this.getAccessToken} />
-          { accessToken &&
-            <View style={styles.tokenContainer}>
-              <Text style={styles.tokenTitle}>Access Token:</Text>
-              <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
+        <View style={styles.container}>
+          <Header>Profile</Header>
+          <Spinner
+            visible={progress}
+            textContent={'Loading...'}
+            textStyle={styles.spinnerTextStyle}
+          />
+          <Error error={error} />
+          { user && (
+            <View style={{ paddingLeft: 20, paddingTop: 20, alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+              <Text style={styles.titleHello}>Welcome {user.name}</Text>
+              <Text style={styles.titleDetails}>Name: {user.name}</Text>
+              <Text style={styles.titleDetails}>Email: {user.preferred_username}</Text>
+              <Text style={styles.titleDetails}>Phone Number: {user.mobilePhone}</Text>
+
             </View>
-          }
-        </View>
-        <View style={styles.row}>
-          <TouchableOpacity onPress={this.logout}>
-            <Text onPress={this.logout} style={styles.logoutButton}>Logout</Text>
-          </TouchableOpacity>
+          )}
+          <View style={{ flexDirection: 'column', marginTop: 20, paddingLeft: 20, width: 300 }}>
+            <Button style={{ marginTop:40 }} onPress={this.getAccessToken} >Get Access token</Button>
+            { accessToken &&
+              <View style={styles.tokenContainer}>
+                <Text style={styles.tokenTitle}>Access Token:</Text>
+                <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
+              </View>
+            }
+            <View style={styles.row}>
+              <Button onPress={this.logout}>
+                Logout
+              </Button>
+            </View>
+          </View>
+          
         </View>
       </Background>
     );
@@ -114,6 +121,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingTop: 40,
     flexDirection: 'column',
   },
   titleHello: {
