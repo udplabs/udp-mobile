@@ -81,7 +81,7 @@ export class ProfileScreen extends React.Component {
           />
           <Error error={error} />
           { user && (
-            <View style={{ paddingLeft: 20, paddingTop: 20, alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+            <View style={{ paddingTop: 20, alignItems: 'flex-start', justifyContent: 'flex-start' }}>
               <Text style={styles.titleHello}>Welcome {user.name}</Text>
               <Text style={styles.titleDetails}>Name: {user.name}</Text>
               <Text style={styles.titleDetails}>Email: {user.preferred_username}</Text>
@@ -89,8 +89,8 @@ export class ProfileScreen extends React.Component {
 
             </View>
           )}
-          <View style={{ flexDirection: 'column', marginTop: 20, paddingLeft: 20, width: 300 }}>
-            <Button style={{ marginTop:40 }} onPress={this.getAccessToken} >Get Access token</Button>
+          <View style={{ flexDirection: 'column', marginTop: 20 }}>
+            <Button style={{ marginTop: 40 }} onPress={this.getAccessToken} >Get Access token</Button>
             { accessToken &&
               <View style={styles.tokenContainer}>
                 <Text style={styles.tokenTitle}>Access Token:</Text>

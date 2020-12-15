@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import axios from 'axios';
+import axios from '../components/Axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -14,7 +14,7 @@ import {
   nameValidator,
   phoneNumberValidator,
 } from '../core/utils';
-import configFile from '../../samples.config'
+import configFile from '../../samples.config';
 
 const RegisterScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState({ value: '', error: '' });
@@ -50,12 +50,6 @@ const RegisterScreen = ({ navigation }) => {
         password: {
           value: password.value,
         }
-      }
-    }, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `SSWS ${configFile.token}`
       }
     })
       .then(response => {
