@@ -4,13 +4,17 @@ import {
   Text,
   View,
 } from 'react-native';
-import { getAccessToken, getUser, clearTokens } from '@okta/okta-react-native';
+import axios from '../components/Axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAccessToken, clearTokens, introspectAccessToken } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { CommonActions } from '@react-navigation/native';
+
 import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
 import Error from '../components/Error';
+import configFile from '../../samples.config';
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
@@ -24,15 +28,19 @@ export class ProfileScreen extends React.Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.setState({ progress: true });
-    getUser()
-      .then(user => {
-        this.setState({ progress: false, user });
-      })
-      .catch(e => {
+    const token = await AsyncStorage.getItem('@accessToken');
+    const result = await introspectAccessToken(token)
+    
+    axios.get(`${configFile.baseUri}/users/${result.uid}`)
+      .then(response => {
+        const { data } = response;
+        this.setState({ progress: false, user: data.profile });
+      }
+      ,(e) => {
         this.setState({ progress: false, error: e.message });
-      });
+      })
   }
 
   getAccessToken = () => {
@@ -82,11 +90,12 @@ export class ProfileScreen extends React.Component {
           <Error error={error} />
           { user && (
             <View style={{ paddingTop: 20, alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-              <Text style={styles.titleHello}>Welcome {user.name}</Text>
-              <Text style={styles.titleDetails}>Name: {user.name}</Text>
-              <Text style={styles.titleDetails}>Email: {user.preferred_username}</Text>
-              <Text style={styles.titleDetails}>Phone Number: {user.mobilePhone}</Text>
-
+              <Text style={styles.titleHello}>Welcome {user.firstName}</Text>
+              <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
+              <Text style={styles.titleDetails}>Email: {user.email}</Text>
+              {
+                user.mobilePhone && <Text style={styles.titleDetails}>Phone Number: {user.mobilePhone}</Text>
+              }
             </View>
           )}
           <View style={{ flexDirection: 'column', marginTop: 20 }}>

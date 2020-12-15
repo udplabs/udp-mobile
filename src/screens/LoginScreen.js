@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native';
 import Background from '../components/Background';
 import {
   signIn,
@@ -7,6 +7,7 @@ import {
   getUserFromIdToken,
   EventEmitter,
 } from '@okta/okta-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -32,11 +33,19 @@ const LoginScreen = ({ navigation }) => {
     }
 
     signIn({ username: email.value, password: password.value })
-      .then(token => {
+      .then(async token => {
+        await AsyncStorage.setItem('@accessToken', token.access_token);
         navigation.navigate('Profile');
       })
       .catch(error => {
-        console.log('login error', error);
+        Alert.alert(
+          'Error',
+          'An error has occured, please try again.',
+          [
+            { text: 'OK', onPress: () => console.log('error', error.message) }
+          ],
+          { cancelable: false }
+        );
       })
   };
   
