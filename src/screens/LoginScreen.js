@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
+
 import Background from '../components/Background';
 import {
   signIn,
@@ -53,9 +54,21 @@ const LoginScreen = ({ navigation }) => {
   _onWebLoginPressed = () => {
     signIn();
   }
-  
-  _onTouchIDPressed = () => {
 
+  _onTouchIDPressed = () => {
+    ReactNativeBiometrics.simplePrompt({promptMessage: 'Confirm fingerprint'})
+    .then((resultObject) => {
+      const { success } = resultObject
+  
+      if (success) {
+        navigation.navigate('Profile');
+      } else {
+        console.log('user cancelled biometric prompt')
+      }
+    })
+    .catch(() => {
+      console.log('biometrics failed')
+    })
   }
 
   useEffect(() => {
