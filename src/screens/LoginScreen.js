@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
 import Background from '../components/Background';
 import {
   signIn,
@@ -8,6 +8,7 @@ import {
   EventEmitter,
 } from '@okta/okta-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReactNativeBiometrics from 'react-native-biometrics';
 
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -52,6 +53,10 @@ const LoginScreen = ({ navigation }) => {
   _onWebLoginPressed = () => {
     signIn();
   }
+  
+  _onTouchIDPressed = () => {
+
+  }
 
   useEffect(() => {
     EventEmitter.addListener('signInSuccess', function(e) {
@@ -72,6 +77,7 @@ const LoginScreen = ({ navigation }) => {
     });
    
     checkAuthentication();
+    
     return () => {
       EventEmitter.removeAllListeners('signInSuccess');
       EventEmitter.removeAllListeners('signOutSuccess');
@@ -87,6 +93,14 @@ const LoginScreen = ({ navigation }) => {
     }
   }
 
+  authFingerPrint = async () => {
+    const { biometryType } = await ReactNativeBiometrics.isSensorAvailable()
+ 
+    if (biometryType === ReactNativeBiometrics.TouchID) {
+      alert('fingerprint');
+    }
+  }
+
   getUserIdToken = async () => {
     let user = await getUserFromIdToken();
     setContext(`
@@ -98,59 +112,71 @@ const LoginScreen = ({ navigation }) => {
   return (
     <Background>
       <BackButton goBack={() => navigation.navigate('Home')} />
-      <Logo />
-      <Header>Welcome back</Header>
+      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+        <View style={styles.inputContainer}>
+          <Logo />
+          <Header>Welcome back</Header>
 
-      <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={text => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      />
+          <TextInput
+            label="Email"
+            returnKeyType="next"
+            value={email.value}
+            onChangeText={text => setEmail({ value: text, error: '' })}
+            error={!!email.error}
+            errorText={email.error}
+            autoCapitalize="none"
+            autoCompleteType="email"
+            textContentType="emailAddress"
+            keyboardType="email-address"
+          />
 
-      <TextInput
-        label="Password"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={text => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
-        secureTextEntry
-      />
+          <TextInput
+            label="Password"
+            returnKeyType="done"
+            value={password.value}
+            onChangeText={text => setPassword({ value: text, error: '' })}
+            error={!!password.error}
+            errorText={password.error}
+            secureTextEntry
+          />
 
-      <View style={styles.forgotPassword}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ForgotPassword')}
-        >
-          <Text style={styles.label}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.forgotPassword}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
+              <Text style={styles.label}>Forgot your password?</Text>
+            </TouchableOpacity>
+          </View>
 
-      <Button mode="contained" onPress={_onLoginPressed}>
-        Login
-      </Button>
+          <Button mode="contained" onPress={_onLoginPressed}>
+            Login
+          </Button>
 
-      <Button mode="contained" onPress={_onWebLoginPressed}>
-        Login via webpage
-      </Button>
+          <Button mode="contained" onPress={_onWebLoginPressed}>
+            Login via webpage
+          </Button>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Don’t have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.link}>Sign up</Text>
-        </TouchableOpacity>
-      </View>
+          <Button mode="contained" onPress={_onTouchIDPressed}>
+            Authenticate with Touch ID
+          </Button>
+          
+          <View style={styles.row}>
+            <Text style={styles.label}>Don’t have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.link}>Sign up</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </Background>
   );
 };
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
   forgotPassword: {
     width: '100%',
     alignItems: 'flex-end',
