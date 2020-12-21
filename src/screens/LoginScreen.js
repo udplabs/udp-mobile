@@ -1,6 +1,8 @@
 import React, { memo, useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
 
+import { CommonActions } from '@react-navigation/native';
+
 import Background from '../components/Background';
 import {
   signIn,
@@ -37,7 +39,6 @@ const LoginScreen = ({ navigation }) => {
     signIn({ username: email.value, password: password.value })
       .then(async token => {
         await AsyncStorage.setItem('@accessToken', token.access_token);
-        navigation.navigate('Profile');
       })
       .catch(error => {
         Alert.alert(
@@ -58,23 +59,28 @@ const LoginScreen = ({ navigation }) => {
   _onTouchIDPressed = () => {
     ReactNativeBiometrics.simplePrompt({promptMessage: 'Confirm fingerprint'})
     .then((resultObject) => {
-      const { success } = resultObject
-  
+      const { success } = resultObject;
       if (success) {
-        navigation.navigate('Profile');
-      } else {
-        console.log('user cancelled biometric prompt')
+        _onLoginPressed();
       }
     })
-    .catch(() => {
-      console.log('biometrics failed')
+    .catch((error) => {
+      console.log('biometrics failed');
     })
   }
 
   useEffect(() => {
     EventEmitter.addListener('signInSuccess', function(e) {
       setAuthenticated(true);
-      navigation.navigate('Profile');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: 'Profile' },
+          ],
+        })
+      );
+
       setContext('Logged in!');
     });
     EventEmitter.addListener('signOutSuccess', function(e) {
@@ -103,14 +109,6 @@ const LoginScreen = ({ navigation }) => {
     const result = await isAuthenticated();
     if (result.authenticated !== authenticated) {
       setAuthenticated(result.authenticated);
-    }
-  }
-
-  authFingerPrint = async () => {
-    const { biometryType } = await ReactNativeBiometrics.isSensorAvailable()
- 
-    if (biometryType === ReactNativeBiometrics.TouchID) {
-      alert('fingerprint');
     }
   }
 
