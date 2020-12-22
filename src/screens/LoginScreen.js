@@ -1,9 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
-
 import { CommonActions } from '@react-navigation/native';
-
-import Background from '../components/Background';
 import {
   signIn,
   isAuthenticated,
@@ -13,13 +10,17 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
+import axios from '../components/Axios';
 import Logo from '../components/Logo';
+import Background from '../components/Background';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator } from '../core/utils';
+import configFile from '../../samples.config';
+import { errorMonitor } from 'events';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState({ value: '', error: '' });
@@ -36,11 +37,105 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    signIn({ username: email.value, password: password.value })
+    /*signIn({ username: email.value, password: password.value })
       .then(async token => {
+        console.log('token------', token);
         await AsyncStorage.setItem('@accessToken', token.access_token);
       })
       .catch(error => {
+        let errorMsg = 'An error has occured, please try again';
+        if(error.message) {
+          errorMsg = error.message;
+        }
+        Alert.alert(
+          'Error',
+          errorMsg,
+          [
+            { text: 'OK', onPress: () => console.log('error', error.message) }
+          ],
+          { cancelable: false }
+        );
+      })*/
+
+    axios.post(`${configFile.baseUri}/authn`, {
+      username: email.value,
+      password: password.value
+    })
+      .then(response => {
+        const { data: { stateToken, _embedded, status} } = response;
+        
+        if(status === 'MFA_REQUIRED') {
+          const userId = _embedded.user.id;
+          const factorId = _embedded.factors[0].id;
+          const verifyLink = `${configFile.baseUri}/users/${userId}/factors/${factorId}/verify`; 
+          
+          axios.post(verifyLink)
+            .then(verifyResponse => {
+              if(verifyResponse.data.factorResult === 'CHALLENGE') {
+                Alert.prompt(
+                  "Enter passcode",
+                  "A verification email with passcode was sent to your email. Please input the passcode here.",
+                  [
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("Cancel Pressed"),
+                      style: "cancel"
+                    },
+                    {
+                      text: "OK",
+                      onPress: passCode => {
+                        axios.post(verifyLink, {
+                          passCode,
+                        })
+                          .then(activateResponse => {
+                            const { factorResult } = activateResponse.data;
+                            if(factorResult === 'SUCCESS') {
+                              navigation.dispatch(
+                                CommonActions.reset({
+                                  index: 0,
+                                  routes: [
+                                    { name: 'Profile' },
+                                  ],
+                                })
+                              );
+                            }
+                          })
+                          .catch(activateError => {
+                            const { data } = activateError.response;
+
+                            const errorMsg = data.errorCauses && data.errorCauses.length > 0 && data.errorCauses[0].errorSummary ? data.errorCauses[0].errorSummary : 'An error has occured, please try again.';
+                            
+                            Alert.alert(
+                              'Error',
+                              errorMsg,
+                              [
+                                { text: 'OK', onPress: () => console.log('error', errorMsg) }
+                              ],
+                              { cancelable: false }
+                            );
+                          })
+                      }
+                    }
+                  ],
+                );
+              }
+            })
+            .catch(verifyError => {
+              const { data } = verifyError.response;
+              const errorMsg = data.errorCauses && data.errorCauses.length > 0 && data.errorCauses[0].errorSummary ? data.errorCauses[0].errorSummary : 'An error has occured, please try again.';
+
+              Alert.alert(
+                'Error',
+                errorMsg,
+                [
+                  { text: 'OK', onPress: () => console.log('error', errorMsg) }
+                ],
+                { cancelable: false }
+              );
+            })   
+        }
+      }
+      ,(error) => {
         Alert.alert(
           'Error',
           'An error has occured, please try again.',
@@ -88,11 +183,11 @@ const LoginScreen = ({ navigation }) => {
       setContext('Logged out!');
     });
     EventEmitter.addListener('onError', function(e) {
-      console.warn(e);
+      console.log(e);
       setContext(e.error_message);
     });
     EventEmitter.addListener('onCancelled', function(e) {
-      console.warn(e);
+      console.log(e);
     });
    
     checkAuthentication();
