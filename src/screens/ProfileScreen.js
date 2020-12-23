@@ -30,10 +30,14 @@ export class ProfileScreen extends React.Component {
 
   async componentDidMount() {
     this.setState({ progress: true });
-    const token = await AsyncStorage.getItem('@accessToken');
-    const result = await introspectAccessToken(token)
-    
-    axios.get(`${configFile.baseUri}/users/${result.uid}`)
+    let userId = await AsyncStorage.getItem('@userId');
+   
+    if(!userId) {
+      const token = await AsyncStorage.getItem('@accessToken');
+      const result = await introspectAccessToken(token);
+      userId = result.uid;
+    }
+    axios.get(`${configFile.baseUri}/users/${userId}`)
       .then(response => {
         const { data } = response;
         this.setState({ progress: false, user: data.profile });
@@ -43,23 +47,38 @@ export class ProfileScreen extends React.Component {
       })
   }
 
-  getAccessToken = () => {
-    this.setState({ progress: false });
-    getAccessToken()
-      .then(token => {
-        this.setState({
-          progress: false,
-          accessToken: token.access_token
-        });
-      })
-      .catch(e => {
-        this.setState({ progress: false, error: e.message });
-      })
+  getAccessToken = async () => {
+    let userId = await AsyncStorage.getItem('@userId');
+    if(!userId) {
+      this.setState({ progress: false });
+      getAccessToken()
+        .then(token => {
+          this.setState({
+            progress: false,
+            accessToken: token.access_token
+          });
+        })
+        .catch(e => {
+          this.setState({ progress: false, error: e.message });
+        })
+    }
   }
 
-  logout = () => {
+  logout = async () => {
     const { navigation } = this.props;
-    clearTokens()
+    const userId = await AsyncStorage.getItem('@userId');
+    if(userId) {
+      await AsyncStorage.removeItem('@userId');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: 'Home' },
+          ],
+        })
+      );
+    } else {
+      clearTokens()
       .then(() => {
         navigation.dispatch(
           CommonActions.reset({
@@ -73,6 +92,7 @@ export class ProfileScreen extends React.Component {
       .catch(e => {
         this.setState({ error: e.message })
       });
+    }
   }
 
   render() {

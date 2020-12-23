@@ -37,26 +37,6 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    /*signIn({ username: email.value, password: password.value })
-      .then(async token => {
-        console.log('token------', token);
-        await AsyncStorage.setItem('@accessToken', token.access_token);
-      })
-      .catch(error => {
-        let errorMsg = 'An error has occured, please try again';
-        if(error.message) {
-          errorMsg = error.message;
-        }
-        Alert.alert(
-          'Error',
-          errorMsg,
-          [
-            { text: 'OK', onPress: () => console.log('error', error.message) }
-          ],
-          { cancelable: false }
-        );
-      })*/
-
     axios.post(`${configFile.baseUri}/authn`, {
       username: email.value,
       password: password.value
@@ -87,9 +67,12 @@ const LoginScreen = ({ navigation }) => {
                         axios.post(verifyLink, {
                           passCode,
                         })
-                          .then(activateResponse => {
+                          .then(async activateResponse => {
                             const { factorResult } = activateResponse.data;
+            
                             if(factorResult === 'SUCCESS') {
+                              await AsyncStorage.setItem('@userId', userId);
+                              await AsyncStorage.removeItem('@accessToken');
                               navigation.dispatch(
                                 CommonActions.reset({
                                   index: 0,
@@ -136,11 +119,14 @@ const LoginScreen = ({ navigation }) => {
         }
       }
       ,(error) => {
+        const { data } = error.response;
+        const errorMsg = data.errorSummary ? data.errorSummary : 'An error has occured, please try again.';
+
         Alert.alert(
           'Error',
-          'An error has occured, please try again.',
+          errorMsg,
           [
-            { text: 'OK', onPress: () => console.log('error', error.message) }
+            { text: 'OK', onPress: () => console.log('error', errorMsg) }
           ],
           { cancelable: false }
         );
@@ -165,7 +151,8 @@ const LoginScreen = ({ navigation }) => {
   }
 
   useEffect(() => {
-    EventEmitter.addListener('signInSuccess', function(e) {
+    EventEmitter.addListener('signInSuccess', async function(e) {
+      await AsyncStorage.setItem('@accessToken', e.access_token);
       setAuthenticated(true);
       navigation.dispatch(
         CommonActions.reset({
@@ -202,7 +189,8 @@ const LoginScreen = ({ navigation }) => {
 
   checkAuthentication = async () => {
     const result = await isAuthenticated();
-    if (result.authenticated !== authenticated) {
+    const userId = await AsyncStorage.getItem('@userId');
+    if (result.authenticated !== authenticated || !!userId) {
       setAuthenticated(result.authenticated);
     }
   }
