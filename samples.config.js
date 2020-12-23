@@ -16,7 +16,7 @@ export default {
     discoveryUri: 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/default',
     redirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/callback',
     endSessionRedirectUri: 'com.oktapreview.udp-udp-mobile-6aa:/callback',
-    scopes: ["openid", "profile", "offline_access"],
+    scopes: ["openid", "profile", "offline_access", "phone", "email"],
     requireHardwareBackedKeyStore: false
   },
   baseUri: 'https://udp-udp-mobile-6aa.oktapreview.com/api/v1',

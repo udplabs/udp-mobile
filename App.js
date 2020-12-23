@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, SafeAreaView } from 'react-native';
 import { isAuthenticated } from '@okta/okta-react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -21,7 +22,12 @@ const App = () => {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const { authenticated } = await isAuthenticated();
+
+      let { authenticated } = await isAuthenticated();
+      const userId = await AsyncStorage.getItem('@userId');
+      if(userId) {
+        authenticated = true;
+      }
       setAuthenticated(authenticated);
       setProgress(false);
     }
