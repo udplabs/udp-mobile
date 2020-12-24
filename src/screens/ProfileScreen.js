@@ -15,6 +15,7 @@ import Background from '../components/Background';
 import Button from '../components/Button';
 import Error from '../components/Error';
 import configFile from '../../samples.config';
+import samplesConfig from '../../samples.config';
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
@@ -61,6 +62,18 @@ export class ProfileScreen extends React.Component {
         .catch(e => {
           this.setState({ progress: false, error: e.message });
         })
+    } else {
+      const sessionToken = await AsyncStorage.getItem('@sessionToken');
+      const url = `https://udp-udp-mobile-6aa.oktapreview.com/oauth2/v1/authorize?client_id=${samplesConfig.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${samplesConfig.oidc.redirectUri}&state=customstate&nonce=52b839be-3b79-4d09-a933-ef04bd34491f&sessionToken=${sessionToken}&prompt=none`;
+      console.log('url----', url);
+
+      axios.get(url)
+        .then(response => {
+          console.log('----', response.data);
+        })
+        .catch(error => {
+          console.log('----', error);
+        })
     }
   }
 
@@ -69,6 +82,7 @@ export class ProfileScreen extends React.Component {
     const userId = await AsyncStorage.getItem('@userId');
     if(userId) {
       await AsyncStorage.removeItem('@userId');
+      await AsyncStorage.removeItem('@sessionToken');
       navigation.dispatch(
         CommonActions.reset({
           index: 0,

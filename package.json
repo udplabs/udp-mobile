@@ -20,7 +20,6 @@
     "events": "^3.2.0",
     "react": "17.0.1",
     "react-native": "0.63.3",
-    "react-native-app-auth": "^6.0.1",
     "react-native-biometrics": "^2.1.4",
     "react-native-gesture-handler": "1.8.0",
     "react-native-loading-spinner-overlay": "^2.0.0",
@@ -30,7 +29,8 @@
     "react-native-screens": "2.14.0",
     "react-native-securerandom": "^1.0.0",
     "react-native-status-bar-height": "^2.6.0",
-    "react-native-vector-icons": "^7.1.0"
+    "react-native-vector-icons": "^7.1.0",
+    "react-native-webview": "^11.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

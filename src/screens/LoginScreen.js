@@ -10,7 +10,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
-import axios from '../components/Axios';
+import axios from 'axios';
 import Logo from '../components/Logo';
 import Background from '../components/Background';
 import Header from '../components/Header';
@@ -41,16 +41,19 @@ const LoginScreen = ({ navigation }) => {
       username: email.value,
       password: password.value
     })
-      .then(response => {
-        const { data: { stateToken, _embedded, status} } = response;
-        
+      .then(async response => {
+        const { data: { _embedded, status } } = response;
+        const userId = _embedded.user.id;
+        console.log('----response', response.data);
         if(status === 'MFA_REQUIRED') {
-          const userId = _embedded.user.id;
+          const { stateToken } =  response;
+         
           const factorId = _embedded.factors[0].id;
           const verifyLink = `${configFile.baseUri}/users/${userId}/factors/${factorId}/verify`; 
           
           axios.post(verifyLink)
             .then(verifyResponse => {
+              console.log('----verifyresponse', verifyResponse.data);
               if(verifyResponse.data.factorResult === 'CHALLENGE') {
                 Alert.prompt(
                   "Enter passcode",
@@ -64,14 +67,16 @@ const LoginScreen = ({ navigation }) => {
                     {
                       text: "OK",
                       onPress: passCode => {
-                        axios.post(verifyLink, {
+                        axios.post(`${configFile.baseUri}/authn/factors/${factorId}/verify`, {
+                          stateToken,
                           passCode,
                         })
                           .then(async activateResponse => {
-                            const { factorResult } = activateResponse.data;
-            
-                            if(factorResult === 'SUCCESS') {
+                            const { status, sessionToken } = activateResponse.data;
+                            console.log('----activateResponse', activateResponse.data);
+                            if(status === 'SUCCESS') {
                               await AsyncStorage.setItem('@userId', userId);
+                              await AsyncStorage.setItem('@sessionToken', sessionToken);
                               await AsyncStorage.removeItem('@accessToken');
                               navigation.dispatch(
                                 CommonActions.reset({
@@ -85,7 +90,7 @@ const LoginScreen = ({ navigation }) => {
                           })
                           .catch(activateError => {
                             const { data } = activateError.response;
-
+                            console.log('----activateError', data);
                             const errorMsg = data.errorCauses && data.errorCauses.length > 0 && data.errorCauses[0].errorSummary ? data.errorCauses[0].errorSummary : 'An error has occured, please try again.';
                             
                             Alert.alert(
@@ -105,6 +110,7 @@ const LoginScreen = ({ navigation }) => {
             })
             .catch(verifyError => {
               const { data } = verifyError.response;
+              console.log('---verifyError', data);
               const errorMsg = data.errorCauses && data.errorCauses.length > 0 && data.errorCauses[0].errorSummary ? data.errorCauses[0].errorSummary : 'An error has occured, please try again.';
 
               Alert.alert(
@@ -116,6 +122,19 @@ const LoginScreen = ({ navigation }) => {
                 { cancelable: false }
               );
             })   
+        } else if(status === 'SUCCESS') {
+          const { sessionToken } = response.data;
+          await AsyncStorage.setItem('@userId', userId);
+          await AsyncStorage.setItem('@sessionToken', sessionToken);
+          await AsyncStorage.removeItem('@accessToken');
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                { name: 'Profile' },
+              ],
+            })
+          );
         }
       }
       ,(error) => {
