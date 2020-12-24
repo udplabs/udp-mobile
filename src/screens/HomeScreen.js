@@ -1,5 +1,8 @@
-import React, { memo } from 'react';
-import { WebView } from 'react-native-webview';
+import React, { memo, useState } from 'react';
+import { Dimensions } from 'react-native'; 
+import WebViewModalProvider, { WebViewModal } from "react-native-webview-modal";
+import { CommonActions } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -17,7 +20,11 @@ const config = {
   scopes: ['openid', 'profile']
 };
 
+const width = Dimensions.get('window').width;
+const height = Dimensions.get('window').height;
+
 const HomeScreen = ({ navigation }) => {
+  const [visible, setVisible] = useState(false);
   _onFacebookLogin = async () => {
     /*
     try {
@@ -38,27 +45,63 @@ const HomeScreen = ({ navigation }) => {
     // await revoke(config, {
     //   tokenToRevoke: refreshedState.refreshToken
     // });
+    setVisible(true);
   }
-  const fbUrl = `${configFile.authUri}?idp=${configFile.oidc.clientId}&client_id=866135357520828&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
-  return (
-    <Background>
-      <Logo />
-      <Header>UDP Mobile</Header>
 
-      <Button mode="contained" onPress={() => navigation.navigate('Login')}>
-        Login with email
-      </Button>
-      <Button
-        mode="outlined"
-        onPress={() => navigation.navigate('Register')}
-      >
-        Sign Up
-      </Button>
-      <Button mode="contained" onPress={() => _onFacebookLogin()}>
-        Login with Facebook
-      </Button>
-      <WebView source={{ uri: fbUrl }} />
-    </Background>
+  onLoad = async(state) => {
+
+    let regex = /[?#]([^=#]+)=([^&#]*)/g,
+      params = {},
+      match
+    while ((match = regex.exec(state.url))) {
+      params[match[1]] = match[2]
+    }
+    const { access_token } = params;
+    console.log('----token', access_token);
+    if(!state.loading) {
+      await AsyncStorage.removeItem('@userId');
+      await AsyncStorage.setItem('@accessToken', access_token);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: 'Profile' },
+          ],
+        })
+      );
+    }
+  }
+
+  const fbUrl = `${configFile.authUri}?idp=0oavyrdmiygFJn4GX0h7&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
+  console.log('fb---', fbUrl);
+  return (
+    <WebViewModalProvider>
+      <Background>
+        <Logo />
+        <Header>UDP Mobile</Header>
+
+        <Button mode="contained" onPress={() => navigation.navigate('Login')}>
+          Login with email
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={() => navigation.navigate('Register')}
+        >
+          Sign Up
+        </Button>
+        <Button mode="contained" onPress={() => _onFacebookLogin()}>
+          Login with Facebook
+        </Button>
+        <WebViewModal
+          visible={visible}
+          source={{ uri: fbUrl }}
+          style={{
+            bottom: 0,
+          }}
+          onNavigationStateChange={onLoad}
+        />
+      </Background>
+    </WebViewModalProvider>
   );
 };
 

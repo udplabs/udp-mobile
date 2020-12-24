@@ -35,6 +35,7 @@ export class ProfileScreen extends React.Component {
    
     if(!userId) {
       const token = await AsyncStorage.getItem('@accessToken');
+      console.log('----token', token);
       const result = await introspectAccessToken(token);
       userId = result.uid;
     }

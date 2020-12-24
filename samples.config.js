@@ -21,6 +21,6 @@ export default {
    
   },
   baseUri: 'https://udp-udp-mobile-6aa.oktapreview.com/api/v1',
-  authUri: 'https://udp-udp-mobile-6aa.oktapreview.com/auth2/v1/authorize',
+  authUri: 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/v1/authorize',
   token: '00zWLiJ7348L8gqRt2lYxJiQ5qTHF57VtQ7fXKHXit',
 };
