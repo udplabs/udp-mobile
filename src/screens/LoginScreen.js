@@ -46,7 +46,7 @@ const LoginScreen = ({ navigation }) => {
         const userId = _embedded.user.id;
         console.log('----response', response.data);
         if(status === 'MFA_REQUIRED') {
-          const { stateToken } =  response;
+          const { stateToken } =  response.data;
          
           const factorId = _embedded.factors[0].id;
           const verifyLink = `${configFile.baseUri}/users/${userId}/factors/${factorId}/verify`; 
@@ -209,7 +209,8 @@ const LoginScreen = ({ navigation }) => {
   checkAuthentication = async () => {
     const result = await isAuthenticated();
     const userId = await AsyncStorage.getItem('@userId');
-    if (result.authenticated !== authenticated || !!userId) {
+    const accessToken = await AsyncStorage.getItem('@accessToken');
+    if (result.authenticated !== !!accessToken || !!userId) {
       setAuthenticated(result.authenticated);
     }
   }

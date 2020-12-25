@@ -4,12 +4,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import axios from '../components/Axios';
+import jwt from 'jwt-lite';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAccessToken, clearTokens, introspectAccessToken } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { CommonActions } from '@react-navigation/native';
 
+import axios from '../components/Axios';
 import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
@@ -25,19 +27,24 @@ export class ProfileScreen extends React.Component {
       accessToken: null,
       user: null,
       progress: true,
-      error: ''
+      error: '',
+      userId: null,
     };
   }
 
   async componentDidMount() {
     this.setState({ progress: true });
     let userId = await AsyncStorage.getItem('@userId');
-   
+    if(userId) {
+      this.setState({ userId });
+    }
     if(!userId) {
-      const token = await AsyncStorage.getItem('@accessToken');
-      console.log('----token', token);
-      const result = await introspectAccessToken(token);
-      userId = result.uid;
+      const accessToken = await AsyncStorage.getItem('@accessToken');
+      if(accessToken) {
+        const result =  jwt.decode(accessToken).claimsSet;
+        userId = result.uid;
+        this.setState({ userId, accessToken });
+      }
     }
     axios.get(`${configFile.baseUri}/users/${userId}`)
       .then(response => {
@@ -50,20 +57,8 @@ export class ProfileScreen extends React.Component {
   }
 
   getAccessToken = async () => {
-    let userId = await AsyncStorage.getItem('@userId');
-    if(!userId) {
-      this.setState({ progress: false });
-      getAccessToken()
-        .then(token => {
-          this.setState({
-            progress: false,
-            accessToken: token.access_token
-          });
-        })
-        .catch(e => {
-          this.setState({ progress: false, error: e.message });
-        })
-    } else {
+    const { accessToken } = this.state;
+    if(!accessToken) {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
       const url = `https://udp-udp-mobile-6aa.oktapreview.com/oauth2/v1/authorize?client_id=${samplesConfig.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${samplesConfig.oidc.redirectUri}&state=customstate&nonce=52b839be-3b79-4d09-a933-ef04bd34491f&sessionToken=${sessionToken}&prompt=none`;
       console.log('url----', url);
@@ -80,10 +75,22 @@ export class ProfileScreen extends React.Component {
 
   logout = async () => {
     const { navigation } = this.props;
-    const userId = await AsyncStorage.getItem('@userId');
-    if(userId) {
+ 
+    clearTokens()
+    .then(() => {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: 'Home' },
+          ],
+        })
+        );
+      })
+    .catch(async e => {
       await AsyncStorage.removeItem('@userId');
       await AsyncStorage.removeItem('@sessionToken');
+      await AsyncStorage.removeItem('@accessToken');
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -92,22 +99,8 @@ export class ProfileScreen extends React.Component {
           ],
         })
       );
-    } else {
-      clearTokens()
-      .then(() => {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              { name: 'Home' },
-            ],
-          })
-          );
-        })
-      .catch(e => {
-        this.setState({ error: e.message })
-      });
-    }
+      this.setState({ error: e.message })
+    });
   }
 
   render() {
