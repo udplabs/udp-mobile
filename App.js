@@ -12,6 +12,7 @@ import {
   ForgotPasswordScreen,
   Dashboard,
   ProfileScreen,
+  SocialLoginModal,
 } from './src/screens';
 
 const Stack = createStackNavigator();
@@ -25,7 +26,9 @@ const App = () => {
 
       let { authenticated } = await isAuthenticated();
       const userId = await AsyncStorage.getItem('@userId');
-      if(userId) {
+      const accessToken = await AsyncStorage.getItem('@accessToken');
+    
+      if(!!userId || !!accessToken) {
         authenticated = true;
       }
       setAuthenticated(authenticated);
@@ -47,41 +50,59 @@ const App = () => {
   }
 
   return (
+    <Stack.Navigator initialRouteName={authenticated ? 'Profile' : 'Home'} headerMode={false}>
+      <Stack.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ title: 'Home', headerLeft: null }} 
+      />
+      <Stack.Screen 
+        name="Login" 
+        component={LoginScreen} 
+        options={{ title: 'Login', headerLeft: null }} 
+      />
+      <Stack.Screen 
+        name="Register" 
+        component={RegisterScreen} 
+        options={{ title: 'Register', headerLeft: null }} 
+      />
+      <Stack.Screen 
+        name="ForgotPassword" 
+        component={ForgotPasswordScreen} 
+        options={{ title: 'ForgotPassword', headerLeft: null }} 
+      />
+      <Stack.Screen 
+        name="Dashboard" 
+        component={Dashboard} 
+        options={{ title: 'Dashboard', headerLeft: null }} 
+      />
+      <Stack.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{ title: 'User Profile'}} 
+      />
+    </Stack.Navigator>
+  )
+};
+
+const Root = () => {
+  return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={authenticated ? 'Profile' : 'Home'} headerMode={false}>
+      <Stack.Navigator headerMode="none" mode="modal">
         <Stack.Screen 
           name="Home" 
-          component={HomeScreen} 
-          options={{ title: 'Home', headerLeft: null }} 
+          component={App}
+          options={{ title: 'App', headerLeft: null }} 
         />
         <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
-          options={{ title: 'Login', headerLeft: null }} 
-        />
-        <Stack.Screen 
-          name="Register" 
-          component={RegisterScreen} 
-          options={{ title: 'Register', headerLeft: null }} 
-        />
-        <Stack.Screen 
-          name="ForgotPassword" 
-          component={ForgotPasswordScreen} 
-          options={{ title: 'ForgotPassword', headerLeft: null }} 
-        />
-        <Stack.Screen 
-          name="Dashboard" 
-          component={Dashboard} 
-          options={{ title: 'Dashboard', headerLeft: null }} 
-        />
-        <Stack.Screen 
-          name="Profile" 
-          component={ProfileScreen} 
-          options={{ title: 'User Profile'}} 
+          name="SocialLoginModal" 
+          component={SocialLoginModal} 
+          options={{
+            cardStyle: { backgroundColor: 'transparent' }
+          }} 
         />
       </Stack.Navigator>
     </NavigationContainer>
   )
 };
-
-export default App;
+export default Root;

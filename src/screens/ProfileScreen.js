@@ -7,7 +7,7 @@ import {
 import jwt from 'jwt-lite';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAccessToken, clearTokens, introspectAccessToken } from '@okta/okta-react-native';
+import { clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { CommonActions } from '@react-navigation/native';
 
@@ -91,6 +91,7 @@ export class ProfileScreen extends React.Component {
       await AsyncStorage.removeItem('@userId');
       await AsyncStorage.removeItem('@sessionToken');
       await AsyncStorage.removeItem('@accessToken');
+      this.setState({ error: e.message })
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -99,7 +100,6 @@ export class ProfileScreen extends React.Component {
           ],
         })
       );
-      this.setState({ error: e.message })
     });
   }
 
