@@ -1,5 +1,7 @@
 import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import ConfirmGoogleCaptcha from 'react-native-google-recaptcha-v2';
+
 import axios from '../components/Axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -16,12 +18,65 @@ import {
 } from '../core/utils';
 import configFile from '../../samples.config';
 
+const siteKey = configFile.reCaptchaSiteKey;
+const baseUrl = configFile.reCaptchaBaseUrl;
+
 const RegisterScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState({ value: '', error: '' });
   const [lastName, setLastName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
+
+  onMessage = event => {
+    if (event && event.nativeEvent.data) {
+      if (['cancel', 'error', 'expired'].includes(event.nativeEvent.data)) {
+        captchaForm.hide();
+        return;
+      } else {
+        console.log('Verified code from Google', event.nativeEvent.data);
+        setTimeout(() => {
+          captchaForm.hide();
+          
+          axios.post(`${configFile.baseUri}/users?activate=true`, {
+          profile: {
+            firstName: firstName.value,
+            lastName: lastName.value,
+            email: email.value,
+            login: email.value,
+            mobilePhone: phoneNumber.value,
+          },
+          credentials: {
+            password: {
+              value: password.value,
+            }
+          }
+        })
+          .then(response => {
+            Alert.alert(
+              'Signup',
+              'You have signed up successfully. Please login to continue.',
+              [
+                { text: 'OK', onPress: () => navigation.navigate('Login') }
+              ],
+              { cancelable: false }
+            );
+          }
+          ,(error) => {
+            Alert.alert(
+              'Error',
+              'An error has occured, please try again.',
+              [
+                { text: 'OK', onPress: () => console.log('error', error.message) }
+              ],
+              { cancelable: false }
+            );
+          })
+
+        }, 1500);
+      }
+   }
+};
 
   const _onSignUpPressed = () => {
     const firstNameError = nameValidator(firstName.value);
@@ -38,40 +93,8 @@ const RegisterScreen = ({ navigation }) => {
       setPhoneNumber({ ...phoneNumber, error: phoneNumberError });
       return;
     }
-    axios.post(`${configFile.baseUri}/users?activate=true`, {
-      profile: {
-        firstName: firstName.value,
-        lastName: lastName.value,
-        email: email.value,
-        login: email.value,
-        mobilePhone: phoneNumber.value,
-      },
-      credentials: {
-        password: {
-          value: password.value,
-        }
-      }
-    })
-      .then(response => {
-        Alert.alert(
-          'Signup',
-          'You have signed up successfully. Please login to continue.',
-          [
-            { text: 'OK', onPress: () => navigation.navigate('Login') }
-          ],
-          { cancelable: false }
-        );
-      }
-      ,(error) => {
-        Alert.alert(
-          'Error',
-          'An error has occured, please try again.',
-          [
-            { text: 'OK', onPress: () => console.log('error', error.message) }
-          ],
-          { cancelable: false }
-        );
-      })
+    captchaForm.show();
+   
   };
 
   return (
@@ -148,6 +171,13 @@ const RegisterScreen = ({ navigation }) => {
               <Text style={styles.link}>Login</Text>
             </TouchableOpacity>
           </View>
+          <ConfirmGoogleCaptcha
+            ref={_ref => captchaForm = _ref}
+            siteKey={siteKey}
+            baseUrl={baseUrl}
+            languageCode='en'
+            onMessage={onMessage}
+          />
         </View>
       </ScrollView>
     </Background>
