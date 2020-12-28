@@ -13,6 +13,7 @@ import {
   Dashboard,
   ProfileScreen,
   SocialLoginModal,
+  CustomWebView,
 } from './src/screens';
 
 const Stack = createStackNavigator();
@@ -97,6 +98,13 @@ const Root = () => {
         <Stack.Screen 
           name="SocialLoginModal" 
           component={SocialLoginModal} 
+          options={{
+            cardStyle: { backgroundColor: 'transparent' }
+          }} 
+        />
+        <Stack.Screen 
+          name="CustomWebView" 
+          component={CustomWebView} 
           options={{
             cardStyle: { backgroundColor: 'transparent' }
           }} 

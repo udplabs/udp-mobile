@@ -11,8 +11,9 @@ import Button from '../components/Button';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-const SocialLoginModal = ({ navigation }) => {
-
+const CustomWebView = (props) => {
+  const uri = `${configFile.authBaseUri}${configFile.authServerId}/v1/authorize?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid%20phone&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+  console.log('---', uri);
   onLoad = async(state) => {
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
@@ -37,7 +38,6 @@ const SocialLoginModal = ({ navigation }) => {
     }
   }
 
-  const fbUrl = `${configFile.authUri}?idp=0oavyrdmiygFJn4GX0h7&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
 
   return (
     <View style={{
@@ -59,7 +59,7 @@ const SocialLoginModal = ({ navigation }) => {
         Close
       </Button>
       <WebView
-        source={{ uri: fbUrl }}
+        source={{ uri }}
         onNavigationStateChange={onLoad}
       />
     </View>
@@ -68,13 +68,13 @@ const SocialLoginModal = ({ navigation }) => {
 
 const Stack = createStackNavigator();
 
-export default function ModalStack() {
+export default function WebViewStack({ route }) {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }}}
       mode="modal"
     >
-      <Stack.Screen name="Modal" component ={memo(SocialLoginModal)} />
+      <Stack.Screen name="Modal" component ={memo(CustomWebView)} />
     </Stack.Navigator>
   )
 }

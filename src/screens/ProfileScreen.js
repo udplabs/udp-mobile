@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Alert,
 } from 'react-native';
 import jwt from 'jwt-lite';
 
@@ -17,7 +18,6 @@ import Background from '../components/Background';
 import Button from '../components/Button';
 import Error from '../components/Error';
 import configFile from '../../samples.config';
-import samplesConfig from '../../samples.config';
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
@@ -29,6 +29,7 @@ export class ProfileScreen extends React.Component {
       progress: true,
       error: '',
       userId: null,
+      hasContent: false,
     };
   }
 
@@ -60,8 +61,7 @@ export class ProfileScreen extends React.Component {
     const { accessToken } = this.state;
     if(!accessToken) {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
-      const url = `https://udp-udp-mobile-6aa.oktapreview.com/oauth2/v1/authorize?client_id=${samplesConfig.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${samplesConfig.oidc.redirectUri}&state=customstate&nonce=52b839be-3b79-4d09-a933-ef04bd34491f&sessionToken=${sessionToken}&prompt=none`;
-      console.log('url----', url);
+      const url = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.oidc.redirectUri}&state=customstate&nonce=${configFile.nonce}&sessionToken=${sessionToken}&prompt=none`;
 
       axios.get(url)
         .then(response => {
@@ -103,8 +103,30 @@ export class ProfileScreen extends React.Component {
     });
   }
 
+  getConsent = () => {
+    Alert.alert(
+      'Consent',
+      'Needs user consent to get the phone number',
+      [
+        {
+          text: 'OK', onPress: () => {
+            
+            this.props.navigation.navigate('CustomWebView');
+            this.setState({ hasConsent: true });
+          }
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
   render() {
-    const { user, accessToken, error, progress } = this.state;
+    const { user, accessToken, error, progress, hasConsent } = this.state;
 
     return (
       <Background>
@@ -122,7 +144,10 @@ export class ProfileScreen extends React.Component {
               <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
               <Text style={styles.titleDetails}>Email: {user.email}</Text>
               {
-                user.mobilePhone && <Text style={styles.titleDetails}>Phone Number: {user.mobilePhone}</Text>
+                !hasConsent && <Button onPress={this.getConsent} >Get phone number</Button>
+              }
+              {
+                user.mobilePhone && hasConsent && <Text style={styles.titleDetails}>Phone Number: {user.mobilePhone}</Text>
               }
             </View>
           )}
@@ -140,7 +165,6 @@ export class ProfileScreen extends React.Component {
               </Button>
             </View>
           </View>
-          
         </View>
       </Background>
     );
