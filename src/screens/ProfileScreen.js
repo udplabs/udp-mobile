@@ -29,12 +29,16 @@ export class ProfileScreen extends React.Component {
       progress: true,
       error: '',
       userId: null,
-      hasContent: false,
+      hasConsent: false,
     };
   }
 
   async componentDidMount() {
+    const { navigation } = this.props;
+    navigation.addListener('focus', this.handleStateChange);
+    this.handleStateChange();
     this.setState({ progress: true });
+    
     let userId = await AsyncStorage.getItem('@userId');
     if(userId) {
       this.setState({ userId });
@@ -55,6 +59,11 @@ export class ProfileScreen extends React.Component {
       ,(e) => {
         this.setState({ progress: false, error: e.message });
       })
+  }
+
+  handleStateChange = async () => {
+    const hasConsent = await AsyncStorage.getItem('@hasConsent');
+    this.setState({ hasConsent: hasConsent === 'phone' });
   }
 
   getAccessToken = async () => {
@@ -78,41 +87,47 @@ export class ProfileScreen extends React.Component {
  
     clearTokens()
     .then(() => {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            { name: 'Home' },
-          ],
-        })
-        );
-      })
+    })
     .catch(async e => {
-      await AsyncStorage.removeItem('@userId');
-      await AsyncStorage.removeItem('@sessionToken');
-      await AsyncStorage.removeItem('@accessToken');
       this.setState({ error: e.message })
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            { name: 'Home' },
-          ],
-        })
-      );
+    })
+    .finally(e => {
+      AsyncStorage.getAllKeys()
+        .then(keys => AsyncStorage.multiRemove(keys))
+        .then(() => {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                { name: 'Home' },
+              ],
+            })
+          );
+        });
     });
   }
 
   getConsent = () => {
+    const { accessToken } = this.state;
     Alert.alert(
       'Consent',
       'Needs user consent to get the phone number',
       [
         {
           text: 'OK', onPress: () => {
-            
-            this.props.navigation.navigate('CustomWebView');
-            this.setState({ hasConsent: true });
+            const uri = `${configFile.authBaseUri}${configFile.authServerId}/v1/authorize?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid%20phone&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+
+            // console.log('---', uri);
+            // axios.put(uri, {
+            //   consent: 'TRUSTED'
+            // })
+            // .then(result => {
+            //   console.log('result---', result.data)
+            // })
+            // .catch(error => {
+            //   console.log('errr-', error.response.data);
+            // });
+            this.props.navigation.navigate('CustomWebView', { accessToken, uri });
           }
         },
         {
@@ -144,15 +159,17 @@ export class ProfileScreen extends React.Component {
               <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
               <Text style={styles.titleDetails}>Email: {user.email}</Text>
               {
-                !hasConsent && <Button onPress={this.getConsent} >Get phone number</Button>
+                !hasConsent && <Button onPress={this.getConsent}>Get phone number</Button>
               }
               {
-                user.mobilePhone && hasConsent && <Text style={styles.titleDetails}>Phone Number: {user.mobilePhone}</Text>
+                user.primaryPhone && hasConsent && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
               }
             </View>
           )}
           <View style={{ flexDirection: 'column', marginTop: 20 }}>
-            <Button style={{ marginTop: 40 }} onPress={this.getAccessToken} >Get Access token</Button>
+            {
+              !accessToken && <Button style={{ marginTop: 40 }} onPress={this.getAccessToken} >Get Access token</Button>
+            }
             { accessToken &&
               <View style={styles.tokenContainer}>
                 <Text style={styles.tokenTitle}>Access Token:</Text>
