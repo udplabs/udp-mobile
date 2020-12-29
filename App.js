@@ -10,7 +10,7 @@ import {
   LoginScreen,
   RegisterScreen,
   ForgotPasswordScreen,
-  Dashboard,
+  EditProfileScreen,
   ProfileScreen,
   SocialLoginModal,
   CustomWebView,
@@ -73,9 +73,9 @@ const App = () => {
         options={{ title: 'ForgotPassword', headerLeft: null }} 
       />
       <Stack.Screen 
-        name="Dashboard" 
-        component={Dashboard} 
-        options={{ title: 'Dashboard', headerLeft: null }} 
+        name="EditProfile" 
+        component={EditProfileScreen} 
+        options={{ title: 'EditProfile', headerLeft: null }} 
       />
       <Stack.Screen 
         name="Profile" 

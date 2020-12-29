@@ -11,8 +11,14 @@ import Button from '../components/Button';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-const SocialLoginModal = ({ navigation }) => {
-
+const SocialLoginModal = ({ route, navigation }) => {
+  const { mode } = route.params;
+  let idp = '0oavyrdmiygFJn4GX0h7';
+  if (mode === 'google') {
+    idp = '0oaw402206kWFqFPj0h7';
+  }
+  const uri = `${configFile.authUri}?idp=${idp}&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
+  
   onLoad = async(state) => {
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
@@ -37,8 +43,6 @@ const SocialLoginModal = ({ navigation }) => {
     }
   }
 
-  const fbUrl = `${configFile.authUri}?idp=0oavyrdmiygFJn4GX0h7&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
-
   return (
     <View style={{
       height: height - 55,
@@ -59,8 +63,9 @@ const SocialLoginModal = ({ navigation }) => {
         Close
       </Button>
       <WebView
-        source={{ uri: fbUrl }}
+        source={{ uri }}
         onNavigationStateChange={onLoad}
+        incognito={true}
       />
     </View>
   );
@@ -68,13 +73,14 @@ const SocialLoginModal = ({ navigation }) => {
 
 const Stack = createStackNavigator();
 
-export default function ModalStack() {
+export default function ModalStack({ route }) {
+  const { mode } = route.params;
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }}}
       mode="modal"
     >
-      <Stack.Screen name="Modal" component ={memo(SocialLoginModal)} />
+      <Stack.Screen name="Modal" component ={memo(SocialLoginModal)} initialParams={{ mode }} />
     </Stack.Navigator>
   )
 }

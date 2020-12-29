@@ -116,17 +116,6 @@ export class ProfileScreen extends React.Component {
         {
           text: 'OK', onPress: () => {
             const uri = `${configFile.authBaseUri}${configFile.authServerId}/v1/authorize?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid%20phone&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-
-            // console.log('---', uri);
-            // axios.put(uri, {
-            //   consent: 'TRUSTED'
-            // })
-            // .then(result => {
-            //   console.log('result---', result.data)
-            // })
-            // .catch(error => {
-            //   console.log('errr-', error.response.data);
-            // });
             this.props.navigation.navigate('CustomWebView', { accessToken, uri });
           }
         },
@@ -141,12 +130,17 @@ export class ProfileScreen extends React.Component {
   }
 
   render() {
+    const { navigation } = this.props;
     const { user, accessToken, error, progress, hasConsent } = this.state;
 
     return (
       <Background>
         <View style={styles.container}>
-          <Header>Profile</Header>
+          <View style={styles.headerRow}>
+            <Header>Profile</Header>
+            <Button onPress={() => navigation.navigate('EditProfile')}>Edit</Button>
+          </View>
+          
           <Spinner
             visible={progress}
             textContent={'Loading...'}
@@ -159,7 +153,7 @@ export class ProfileScreen extends React.Component {
               <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
               <Text style={styles.titleDetails}>Email: {user.email}</Text>
               {
-                !hasConsent && <Button onPress={this.getConsent}>Get phone number</Button>
+                !hasConsent && <Button onPress={this.getConsent}>Get consent</Button>
               }
               {
                 user.primaryPhone && hasConsent && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
@@ -177,7 +171,7 @@ export class ProfileScreen extends React.Component {
               </View>
             }
             <View style={styles.row}>
-              <Button onPress={this.logout}>
+              <Button onPress={this.logout} mode="outlined">
                 Logout
               </Button>
             </View>
@@ -191,6 +185,12 @@ export class ProfileScreen extends React.Component {
 const styles = StyleSheet.create({
   spinnerTextStyle: {
     color: '#FFF',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   logoutButton: {
     paddingLeft: 10,

@@ -6,7 +6,11 @@ import Button from '../components/Button';
 
 const HomeScreen = ({ navigation }) => {
   _onFacebookLogin = async () => {
-    navigation.navigate('SocialLoginModal');
+    navigation.navigate('SocialLoginModal', { mode: 'facebook'});
+  }
+
+  _onGoogleLogin = async () => {
+    navigation.navigate('SocialLoginModal', { mode: 'google'});
   }
 
   return (
@@ -25,6 +29,9 @@ const HomeScreen = ({ navigation }) => {
       </Button>
       <Button mode="contained" onPress={() => _onFacebookLogin()}>
         Login with Facebook
+      </Button>
+      <Button mode="contained" onPress={() => _onGoogleLogin()}>
+        Login with Google
       </Button>
     </Background>
   );
