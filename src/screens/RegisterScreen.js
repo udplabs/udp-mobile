@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import ConfirmGoogleCaptcha from 'react-native-google-recaptcha-v2';
+import CheckBox from '@react-native-community/checkbox';
 
 import axios from '../components/Axios';
 import Background from '../components/Background';
@@ -21,12 +22,15 @@ import configFile from '../../samples.config';
 const siteKey = configFile.reCaptchaSiteKey;
 const baseUrl = configFile.reCaptchaBaseUrl;
 
+const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+
 const RegisterScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState({ value: '', error: '' });
   const [lastName, setLastName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
+  const [toggleCheckBox, setToggleCheckBox] = useState(false);
 
   onMessage = event => {
     if (event && event.nativeEvent.data) {
@@ -75,8 +79,19 @@ const RegisterScreen = ({ navigation }) => {
 
         }, 1500);
       }
-   }
-};
+    }
+  };
+
+  showTerms = () => {
+    Alert.alert(
+      'Terms and Conditions',
+      termsText,
+      [
+        { text: 'OK', onPress: () => {} }
+      ],
+      { cancelable: false }
+    );
+  }
 
   const _onSignUpPressed = () => {
     const firstNameError = nameValidator(firstName.value);
@@ -160,7 +175,17 @@ const RegisterScreen = ({ navigation }) => {
             errorText={password.error}
             secureTextEntry
           />
-
+          <View style={styles.termsRow}>
+            <CheckBox
+              disabled={false}
+              value={toggleCheckBox}
+              onValueChange={(newValue) => setToggleCheckBox(newValue)}
+            />
+            <Text style={{ marginLeft: 10 }}>I agree to </Text>
+            <TouchableOpacity style={styles.termsButton} onPress={showTerms}>
+              <Text style={{ color: 'blue' }}>terms and conditions</Text>
+            </TouchableOpacity>
+          </View>
           <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
             Sign Up
           </Button>
@@ -203,6 +228,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.primary,
   },
+  termsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  termsButton: {
+    padding: 0,
+    margin: 0,
+  }
 });
 
 export default memo(RegisterScreen);

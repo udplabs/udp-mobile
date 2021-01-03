@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Alert,
+  // Alert,
 } from 'react-native';
 import jwt from 'jwt-lite';
 
@@ -47,6 +47,7 @@ export class ProfileScreen extends React.Component {
       const accessToken = await AsyncStorage.getItem('@accessToken');
       if(accessToken) {
         const result =  jwt.decode(accessToken).claimsSet;
+        console.log('---result', result);
         userId = result.uid;
         this.setState({ userId, accessToken });
       }
@@ -107,27 +108,27 @@ export class ProfileScreen extends React.Component {
     });
   }
 
-  getConsent = () => {
-    const { accessToken } = this.state;
-    Alert.alert(
-      'Consent',
-      'Needs user consent to get the phone number',
-      [
-        {
-          text: 'OK', onPress: () => {
-            const uri = `${configFile.authBaseUri}${configFile.authServerId}/v1/authorize?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid%20phone&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-            this.props.navigation.navigate('CustomWebView', { accessToken, uri });
-          }
-        },
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-      ],
-      { cancelable: false }
-    );
-  }
+  // getConsent = () => {
+  //   const { accessToken } = this.state;
+  //   Alert.alert(
+  //     'Consent',
+  //     'Needs user consent to get the phone number',
+  //     [
+  //       {
+  //         text: 'OK', onPress: () => {
+  //           const uri = `${configFile.authBaseUri}${configFile.authServerId}/v1/authorize?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid%20phone&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+  //           this.props.navigation.navigate('CustomWebView', { accessToken, uri });
+  //         }
+  //       },
+  //       {
+  //         text: "Cancel",
+  //         onPress: () => console.log("Cancel Pressed"),
+  //         style: "cancel"
+  //       },
+  //     ],
+  //     { cancelable: false }
+  //   );
+  // }
 
   render() {
     const { navigation } = this.props;
@@ -152,9 +153,9 @@ export class ProfileScreen extends React.Component {
               <Text style={styles.titleHello}>Welcome {user.firstName}</Text>
               <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
               <Text style={styles.titleDetails}>Email: {user.email}</Text>
-              {
+              {/* {
                 !hasConsent && <Button onPress={this.getConsent}>Get consent</Button>
-              }
+              } */}
               {
                 user.primaryPhone && hasConsent && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
               }
