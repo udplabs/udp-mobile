@@ -9,8 +9,12 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('SocialLoginModal', { mode: 'facebook'});
   }
 
-  _onGoogleLogin = async () => {
-    navigation.navigate('SocialLoginModal', { mode: 'google'});
+  // _onGoogleLogin = async () => {
+  //   navigation.navigate('SocialLoginModal', { mode: 'google'});
+  // }
+
+  _onAppleLogin = async () => {
+    navigation.navigate('SocialLoginModal', { mode: 'apple'});
   }
 
   return (
@@ -30,8 +34,11 @@ const HomeScreen = ({ navigation }) => {
       <Button mode="contained" onPress={() => _onFacebookLogin()}>
         Login with Facebook
       </Button>
-      <Button mode="contained" onPress={() => _onGoogleLogin()}>
+      {/* <Button mode="contained" onPress={() => _onGoogleLogin()}>
         Login with Google
+      </Button> */}
+      <Button mode="contained" onPress={() => _onAppleLogin()}>
+        Login with Apple
       </Button>
     </Background>
   );

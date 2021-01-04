@@ -16,10 +16,13 @@ const SocialLoginModal = ({ route, navigation }) => {
   let idp = '0oavyrdmiygFJn4GX0h7';
   if (mode === 'google') {
     idp = '0oaw402206kWFqFPj0h7';
+  } else if(mode === 'apple') {
+    idp = '0oaw729qicIxZkUtN0h7';
   }
   const uri = `${configFile.authUri}?idp=${idp}&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
-  
+  console.log('uri----', uri);
   onLoad = async(state) => {
+    console.log('state----', state.url);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
       let params = {};

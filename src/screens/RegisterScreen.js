@@ -43,19 +43,19 @@ const RegisterScreen = ({ navigation }) => {
           captchaForm.hide();
           
           axios.post(`${configFile.baseUri}/users?activate=true`, {
-          profile: {
-            firstName: firstName.value,
-            lastName: lastName.value,
-            email: email.value,
-            login: email.value,
-            mobilePhone: phoneNumber.value,
-          },
-          credentials: {
-            password: {
-              value: password.value,
+            profile: {
+              firstName: firstName.value,
+              lastName: lastName.value,
+              email: email.value,
+              login: email.value,
+              primaryPhone: phoneNumber.value,
+            },
+            credentials: {
+              password: {
+                value: password.value,
+              }
             }
-          }
-        })
+          })
           .then(response => {
             Alert.alert(
               'Signup',
@@ -100,7 +100,7 @@ const RegisterScreen = ({ navigation }) => {
     const passwordError = passwordValidator(password.value);
     const phoneNumberError = phoneNumberValidator(phoneNumber.value);
 
-    if (emailError || passwordError || firstNameError) {
+    if (emailError || passwordError || firstNameError || lastNameError) {
       setFirstName({ ...firstName, error: firstNameError });
       setLastName({ ...lastName, error: lastNameError });
       setEmail({ ...email, error: emailError });
@@ -152,6 +152,8 @@ const RegisterScreen = ({ navigation }) => {
           />
           <TextInput
             keyboardType="numeric"
+            returnKeyType="next"
+            label="Mobile number"
             placeholder='Enter mobile number'
             value={phoneNumber.value}
             error={!!phoneNumber.error}
@@ -186,7 +188,7 @@ const RegisterScreen = ({ navigation }) => {
               <Text style={{ color: 'blue' }}>terms and conditions</Text>
             </TouchableOpacity>
           </View>
-          <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
+          <Button mode="contained" onPress={_onSignUpPressed} style={styles.button} disabled={!toggleCheckBox}>
             Sign Up
           </Button>
 

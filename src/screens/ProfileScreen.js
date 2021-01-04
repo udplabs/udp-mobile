@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  // Alert,
 } from 'react-native';
 import jwt from 'jwt-lite';
 
@@ -29,7 +28,6 @@ export class ProfileScreen extends React.Component {
       progress: true,
       error: '',
       userId: null,
-      hasConsent: false,
     };
   }
 
@@ -37,6 +35,10 @@ export class ProfileScreen extends React.Component {
     const { navigation } = this.props;
     navigation.addListener('focus', this.handleStateChange);
     this.handleStateChange();
+    await this.loadProfile();
+  }
+
+  loadProfile = async () => {
     this.setState({ progress: true });
     
     let userId = await AsyncStorage.getItem('@userId');
@@ -63,8 +65,7 @@ export class ProfileScreen extends React.Component {
   }
 
   handleStateChange = async () => {
-    const hasConsent = await AsyncStorage.getItem('@hasConsent');
-    this.setState({ hasConsent: hasConsent === 'phone' });
+    this.loadProfile();
   }
 
   getAccessToken = async () => {
@@ -108,38 +109,16 @@ export class ProfileScreen extends React.Component {
     });
   }
 
-  // getConsent = () => {
-  //   const { accessToken } = this.state;
-  //   Alert.alert(
-  //     'Consent',
-  //     'Needs user consent to get the phone number',
-  //     [
-  //       {
-  //         text: 'OK', onPress: () => {
-  //           const uri = `${configFile.authBaseUri}${configFile.authServerId}/v1/authorize?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid%20phone&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-  //           this.props.navigation.navigate('CustomWebView', { accessToken, uri });
-  //         }
-  //       },
-  //       {
-  //         text: "Cancel",
-  //         onPress: () => console.log("Cancel Pressed"),
-  //         style: "cancel"
-  //       },
-  //     ],
-  //     { cancelable: false }
-  //   );
-  // }
-
   render() {
     const { navigation } = this.props;
-    const { user, accessToken, error, progress, hasConsent } = this.state;
+    const { user, accessToken, error, progress, userId } = this.state;
 
     return (
       <Background>
         <View style={styles.container}>
           <View style={styles.headerRow}>
             <Header>Profile</Header>
-            <Button onPress={() => navigation.navigate('EditProfile')}>Edit</Button>
+            <Button onPress={() => navigation.navigate('EditProfile', { user, userId })}>Edit</Button>
           </View>
           
           <Spinner
@@ -153,11 +132,8 @@ export class ProfileScreen extends React.Component {
               <Text style={styles.titleHello}>Welcome {user.firstName}</Text>
               <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
               <Text style={styles.titleDetails}>Email: {user.email}</Text>
-              {/* {
-                !hasConsent && <Button onPress={this.getConsent}>Get consent</Button>
-              } */}
               {
-                user.primaryPhone && hasConsent && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
+                user.primaryPhone && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
               }
             </View>
           )}
