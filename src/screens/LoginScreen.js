@@ -27,6 +27,8 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState({ value: '', error: '' });
   const [authenticated, setAuthenticated] = useState(false);
   const [context, setContext] = useState(null);
+  const [fingerprint, setFingerprint] = useState(null);
+
   const _onLoginPressed = () => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
@@ -40,6 +42,12 @@ const LoginScreen = ({ navigation }) => {
     axios.post(`${configFile.baseUri}/authn`, {
       username: email.value,
       password: password.value
+    }, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...fingerprint && { 'X-Device-Fingerprint': fingerprint }
+      }
     })
       .then(async response => {
         const { data: { _embedded, status } } = response;
@@ -156,17 +164,40 @@ const LoginScreen = ({ navigation }) => {
     signIn();
   }
 
-  _onTouchIDPressed = () => {
-    ReactNativeBiometrics.simplePrompt({promptMessage: 'Confirm fingerprint'})
-    .then((resultObject) => {
-      const { success } = resultObject;
-      if (success) {
-        _onLoginPressed();
-      }
-    })
-    .catch((error) => {
-      console.log('biometrics failed');
-    })
+  const _onTouchIDPressed = async () => {
+    const { biometryType } = await ReactNativeBiometrics.isSensorAvailable()
+ 
+    if (biometryType === ReactNativeBiometrics.TouchID) {
+      let epochTimeSeconds = Math.round((new Date()).getTime() / 1000).toString()
+        let payload = epochTimeSeconds + 'some message'
+        ReactNativeBiometrics.createSignature({
+          promptMessage: 'Sign in',
+          payload,
+        })  
+        .then((resultObject) => {
+          const { success, signature } = resultObject
+
+          if (success) {
+            console.log(signature)
+            setFingerprint(signature);
+            _onLoginPressed();
+
+          }
+        })
+        .catch((error) => {
+          console.log('biometrics failed');
+        })
+    }
+    else {
+      Alert.alert(
+        'Error',
+        'Touch ID is not supported.',
+        [
+          { text: 'OK', onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    }
   }
 
   useEffect(() => {
