@@ -9,7 +9,6 @@ import Button from '../components/Button';
 import axios from '../components/Axios';
 import {
   emailValidator,
-  passwordValidator,
   nameValidator,
   phoneNumberValidator,
 } from '../core/utils';

@@ -28,4 +28,6 @@ export default {
   reCaptchaSiteKey: '6LfQExQaAAAAAKOtmshnR544I5qQkp-vfYJ2TGyL',
   reCaptchaBaseUrl: 'https://udp-udp-mobile-6aa.oktapreview.com',
   nonce: '52b839be-3b79-4d09-a933-ef04bd34491f',
+  evidentUrl: 'https://j8d461nbhb.execute-api.us-east-2.amazonaws.com/dev/evidentio',
+
 };

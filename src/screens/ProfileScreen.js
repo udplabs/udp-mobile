@@ -10,8 +10,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { CommonActions } from '@react-navigation/native';
+import axios from 'axios';
 
-import axios from '../components/Axios';
+import customAxios from '../components/Axios';
 import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
@@ -40,21 +41,21 @@ export class ProfileScreen extends React.Component {
 
   loadProfile = async () => {
     this.setState({ progress: true });
-    
+    const accessToken = await AsyncStorage.getItem('@accessToken');
+    if(accessToken) {
+      this.setState({ accessToken });
+    }
     let userId = await AsyncStorage.getItem('@userId');
     if(userId) {
       this.setState({ userId });
-    }
-    if(!userId) {
-      const accessToken = await AsyncStorage.getItem('@accessToken');
+    } else {
       if(accessToken) {
         const result =  jwt.decode(accessToken).claimsSet;
-        console.log('---result', result);
         userId = result.uid;
-        this.setState({ userId, accessToken });
+        this.setState({ userId });
       }
     }
-    axios.get(`${configFile.baseUri}/users/${userId}`)
+    customAxios.get(`${configFile.baseUri}/users/${userId}`)
       .then(response => {
         const { data } = response;
         this.setState({ progress: false, user: data.profile });
@@ -69,18 +70,13 @@ export class ProfileScreen extends React.Component {
   }
 
   getAccessToken = async () => {
+    const { navigation } = this.props;
     const { accessToken } = this.state;
     if(!accessToken) {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
-      const url = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.oidc.redirectUri}&state=customstate&nonce=${configFile.nonce}&sessionToken=${sessionToken}&prompt=none`;
+      const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&sessionToken=${sessionToken}`;
 
-      axios.get(url)
-        .then(response => {
-          console.log('----', response.data);
-        })
-        .catch(error => {
-          console.log('----', error);
-        })
+      navigation.navigate('CustomWebView', { uri });
     }
   }
 
@@ -109,6 +105,24 @@ export class ProfileScreen extends React.Component {
     });
   }
 
+  verifyId = () => {
+    const { accessToken } = this.state;
+    console.log('---', accessToken);
+    axios.post(`${configFile.evidentUrl}/token`, {
+    }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    })
+      .then(response => {
+        const { data } = response;
+        console.log('response---', data);
+      }
+      ,(e) => {
+        console.log('error---', e);
+      })
+  }
+
   render() {
     const { navigation } = this.props;
     const { user, accessToken, error, progress, userId } = this.state;
@@ -118,7 +132,7 @@ export class ProfileScreen extends React.Component {
         <View style={styles.container}>
           <View style={styles.headerRow}>
             <Header>Profile</Header>
-            <Button onPress={() => navigation.navigate('EditProfile', { user, userId })}>Edit</Button>
+            <Button style={{ flexDirection: 'row' }} onPress={() => navigation.navigate('EditProfile', { user, userId })}>Edit</Button>
           </View>
           
           <Spinner
@@ -147,6 +161,11 @@ export class ProfileScreen extends React.Component {
                 <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
               </View>
             }
+            <View style={styles.row}>
+              <Button onPress={this.verifyId} mode="outlined">
+                Verify ID
+              </Button>
+            </View>
             <View style={styles.row}>
               <Button onPress={this.logout} mode="outlined">
                 Logout

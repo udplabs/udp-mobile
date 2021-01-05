@@ -10,21 +10,20 @@ const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const CustomWebView = ({ route, navigation }) => {
-  const { uri, accessToken } = route.params;
+  const { uri } = route.params;
   
   onLoad = async(state) => {
-    console.log('----', state.url);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
       let params = {};
       while ((match = regex.exec(state.url))) {
         params[match[1]] = match[2]
       }
-      
-      await AsyncStorage.setItem('@hasConsent', "phone");
+      const { access_token } = params;
+
+      await AsyncStorage.setItem('@accessToken', access_token);
       await navigation.goBack(null);
     } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
-      await AsyncStorage.removeItem('@hasConsent');
       await navigation.goBack(null);
     }
   }
@@ -51,7 +50,7 @@ const CustomWebView = ({ route, navigation }) => {
       <WebView
         source={{ uri }}
         onNavigationStateChange={onLoad}
-        incognito={!accessToken}
+        incognito={true}
       />
     </View>
   );
@@ -60,13 +59,13 @@ const CustomWebView = ({ route, navigation }) => {
 const Stack = createStackNavigator();
 
 export default function WebViewStack({ route, navigation }) {
-  const { accessToken, uri } = route.params;
+  const { uri } = route.params;
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }}}
       mode="modal"
     >
-      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, accessToken }} />
+      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri }} />
     </Stack.Navigator>
   )
 }

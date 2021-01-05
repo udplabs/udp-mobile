@@ -165,10 +165,14 @@ const LoginScreen = ({ navigation }) => {
   }
 
   const _onTouchIDPressed = async () => {
-    const { biometryType } = await ReactNativeBiometrics.isSensorAvailable()
- 
+    const { available, biometryType } = await ReactNativeBiometrics.isSensorAvailable()
+    
     if (biometryType === ReactNativeBiometrics.TouchID) {
-      let epochTimeSeconds = Math.round((new Date()).getTime() / 1000).toString()
+      ReactNativeBiometrics.createKeys('Confirm fingerprint')
+      .then((resultObject) => {
+        const { publicKey } = resultObject
+
+        let epochTimeSeconds = Math.round((new Date()).getTime() / 1000).toString()
         let payload = epochTimeSeconds + 'some message'
         ReactNativeBiometrics.createSignature({
           promptMessage: 'Sign in',
@@ -185,8 +189,9 @@ const LoginScreen = ({ navigation }) => {
           }
         })
         .catch((error) => {
-          console.log('biometrics failed');
+          console.log('biometrics failed---', error);
         })
+      })
     }
     else {
       Alert.alert(
