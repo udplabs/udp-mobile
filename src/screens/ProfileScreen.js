@@ -2,6 +2,7 @@
 import {
   StyleSheet,
   Text,
+  Alert,
   View,
 } from 'react-native';
 import jwt from 'jwt-lite';
@@ -28,6 +29,8 @@ export class ProfileScreen extends React.Component {
       progress: true,
       error: '',
       userId: null,
+      idStatus: null,
+      uploadedID: null,
     };
   }
 
@@ -36,6 +39,14 @@ export class ProfileScreen extends React.Component {
     navigation.addListener('focus', this.handleStateChange);
     this.handleStateChange();
     await this.loadProfile();
+    const uploadedID = await AsyncStorage.getItem('@uploadedID');
+    if(uploadedID) {
+      this.setState({ uploadedID });
+    }
+    const idStatus = await AsyncStorage.getItem('@idStatus');
+    if(idStatus) {
+      this.setState({ idStatus });
+    }
   }
 
   loadProfile = async () => {
@@ -106,8 +117,9 @@ export class ProfileScreen extends React.Component {
     });
   }
 
-  verifyId = () => {
+  uploadID = () => {
     const { accessToken } = this.state;
+    const { navigation } = this.props;
     if(accessToken) {
       var instance = axios.create();
       delete instance.defaults.headers.common['Authorization'];
@@ -121,18 +133,75 @@ export class ProfileScreen extends React.Component {
         }
       })
       .then(response => {
-        const { data } = response;
-        console.log('response---', data);
+        const { data: {
+          id,
+          _links: {
+            url
+          }
+        }} = response;
+        navigation.navigate('IDVerification', { uri: url, id, onGoBack: () => this.verifyId() });
       }
       ,(e) => {
-        console.log('error---', e.response);
+        Alert.alert(
+          'Error',
+          'An alert has occured, please try again later',
+          [
+            { text: 'OK', onPress: () => {} }
+          ],
+          { cancelable: false }
+        );
       })
     }
   }
 
+  verifyId = async () => {
+    const { accessToken } = this.state;
+    const id = await AsyncStorage.getItem('@uploadedID');
+    console.log('---id', id);
+    console.log('---accessToken', accessToken);
+    var instance = axios.create();
+    const self = this;
+    delete instance.defaults.headers.common['Authorization'];
+    instance.post(`${configFile.evidentUrl}/updateidentity`, {
+      evident_id: id,
+      subdomain: "udp-mobile",
+      app: "udp-mobile",
+    }, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(async(response) => {
+      const {
+        data: {
+          status
+        }
+      } = response;
+
+      self.setState({ idStatus: status });
+      await AsyncStorage.setItem('@idStatus', status);
+      if(status === 'Verified') {
+        await AsyncStorage.removeItem('@uploadedID');
+      }
+    }
+    ,(e) => {
+      console.log('error---', e);
+      Alert.alert(
+        'Error',
+        'An alert has occured, please try again later',
+        [
+          { text: 'OK', onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    })
+
+  }
+
   render() {
     const { navigation } = this.props;
-    const { user, accessToken, error, progress, userId } = this.state;
+    const { user, accessToken, error, progress, userId, idStatus } = this.state;
 
     return (
       <Background>
@@ -169,9 +238,17 @@ export class ProfileScreen extends React.Component {
               </View>
             }
             <View style={styles.row}>
-              <Button onPress={this.verifyId} mode="outlined">
-                Verify ID
+              <Button onPress={this.uploadID} mode="outlined">
+                Upload ID
               </Button>
+              {
+                idStatus === 'Pending' && <Button onPress={this.verifyId} mode="outlined">
+                  Check Status
+                </Button>
+              }
+              {
+                idStatus === 'Verified' && <Text style={styles.verified}>ID Verified</Text>
+              }
             </View>
             <View style={styles.row}>
               <Button onPress={this.logout} mode="outlined">
@@ -224,5 +301,8 @@ const styles = StyleSheet.create({
   tokenTitle: {
     fontSize: 16,
     fontWeight: 'bold'
+  },
+  verified: {
+    color: 'green',
   }
 });
