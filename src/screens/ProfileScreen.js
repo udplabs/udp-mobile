@@ -11,7 +11,6 @@ import { clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { CommonActions } from '@react-navigation/native';
 import axios from 'axios';
-
 import customAxios from '../components/Axios';
 import Header from '../components/Header';
 import Background from '../components/Background';
@@ -45,12 +44,14 @@ export class ProfileScreen extends React.Component {
     if(accessToken) {
       this.setState({ accessToken });
     }
+
     let userId = await AsyncStorage.getItem('@userId');
     if(userId) {
       this.setState({ userId });
     } else {
       if(accessToken) {
         const result =  jwt.decode(accessToken).claimsSet;
+        
         userId = result.uid;
         this.setState({ userId });
       }
@@ -107,20 +108,26 @@ export class ProfileScreen extends React.Component {
 
   verifyId = () => {
     const { accessToken } = this.state;
-    console.log('---', accessToken);
-    axios.post(`${configFile.evidentUrl}/token`, {
-    }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      }
-    })
+    if(accessToken) {
+      var instance = axios.create();
+      delete instance.defaults.headers.common['Authorization'];
+      instance.post(`${configFile.evidentUrl}/token`, {
+        subdomain: "udp-mobile",
+        app: "udp-mobile",
+      }, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        }
+      })
       .then(response => {
         const { data } = response;
         console.log('response---', data);
       }
       ,(e) => {
-        console.log('error---', e);
+        console.log('error---', e.response);
       })
+    }
   }
 
   render() {
