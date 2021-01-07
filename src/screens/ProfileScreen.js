@@ -4,6 +4,7 @@ import {
   Text,
   Alert,
   View,
+  ScrollView,
 } from 'react-native';
 import jwt from 'jwt-lite';
 
@@ -157,8 +158,7 @@ export class ProfileScreen extends React.Component {
   verifyId = async () => {
     const { accessToken } = this.state;
     const id = await AsyncStorage.getItem('@uploadedID');
-    console.log('---id', id);
-    console.log('---accessToken', accessToken);
+
     var instance = axios.create();
     const self = this;
     delete instance.defaults.headers.common['Authorization'];
@@ -180,13 +180,14 @@ export class ProfileScreen extends React.Component {
       } = response;
 
       self.setState({ idStatus: status });
+
       await AsyncStorage.setItem('@idStatus', status);
       if(status === 'Verified') {
         await AsyncStorage.removeItem('@uploadedID');
       }
     }
     ,(e) => {
-      console.log('error---', e);
+      console.log('----verifyError: ', e.response);
       Alert.alert(
         'Error',
         'An alert has occured, please try again later',
@@ -205,6 +206,7 @@ export class ProfileScreen extends React.Component {
 
     return (
       <Background>
+        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <View style={styles.headerRow}>
             <Header>Profile</Header>
@@ -238,16 +240,16 @@ export class ProfileScreen extends React.Component {
               </View>
             }
             <View style={styles.row}>
+              {
+                idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
+              }
               <Button onPress={this.uploadID} mode="outlined">
-                Upload ID
+                Upload a new ID
               </Button>
               {
                 idStatus === 'Pending' && <Button onPress={this.verifyId} mode="outlined">
                   Check Status
                 </Button>
-              }
-              {
-                idStatus === 'Verified' && <Text style={styles.verified}>ID Verified</Text>
               }
             </View>
             <View style={styles.row}>
@@ -257,6 +259,7 @@ export class ProfileScreen extends React.Component {
             </View>
           </View>
         </View>
+        </ScrollView>
       </Background>
     );
   }
@@ -303,6 +306,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   verified: {
+    marginTop: 20,
     color: 'green',
   }
 });

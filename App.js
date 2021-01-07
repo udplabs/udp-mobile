@@ -14,6 +14,7 @@ import {
   ProfileScreen,
   SocialLoginModal,
   CustomWebView,
+  IDVerification,
 } from './src/screens';
 
 const Stack = createStackNavigator();
@@ -105,6 +106,13 @@ const Root = () => {
         <Stack.Screen 
           name="CustomWebView" 
           component={CustomWebView} 
+          options={{
+            cardStyle: { backgroundColor: 'transparent' }
+          }} 
+        />
+        <Stack.Screen 
+          name="IDVerification" 
+          component={IDVerification} 
           options={{
             cardStyle: { backgroundColor: 'transparent' }
           }} 

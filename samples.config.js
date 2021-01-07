@@ -24,7 +24,7 @@ export default {
   authBaseUri: 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/',
   authUri: 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/v1/authorize',
   authServerId: 'ausvf9j4hdneFCzLE0h7',
-  token: '00zWLiJ7348L8gqRt2lYxJiQ5qTHF57VtQ7fXKHXit',
+  token: '00dhVBdVh5JyYJq8rszHvFsi3nEhcDw_-jUxOK6MX6',
   reCaptchaSiteKey: '6LfQExQaAAAAAKOtmshnR544I5qQkp-vfYJ2TGyL',
   reCaptchaBaseUrl: 'https://udp-udp-mobile-6aa.oktapreview.com',
   nonce: '52b839be-3b79-4d09-a933-ef04bd34491f',
