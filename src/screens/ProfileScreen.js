@@ -20,6 +20,8 @@ import Button from '../components/Button';
 import Error from '../components/Error';
 import configFile from '../../samples.config';
 
+const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+
 export class ProfileScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -39,7 +41,6 @@ export class ProfileScreen extends React.Component {
     const { navigation } = this.props;
     navigation.addListener('focus', this.handleStateChange);
     this.handleStateChange();
-    await this.loadProfile();
     const uploadedID = await AsyncStorage.getItem('@uploadedID');
     if(uploadedID) {
       this.setState({ uploadedID });
@@ -68,7 +69,14 @@ export class ProfileScreen extends React.Component {
         this.setState({ userId });
       }
     }
-    customAxios.get(`${configFile.baseUri}/users/${userId}`)
+
+    // Checking if the user accepted the permission
+    const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
+    const userArray = JSON.parse(acceptedUsers) || [];
+    if(userArray.indexOf(userId) < 0)  {
+      this.showTerms();
+    } else {
+      customAxios.get(`${configFile.baseUri}/users/${userId}`)
       .then(response => {
         const { data } = response;
         this.setState({ progress: false, user: data.profile });
@@ -76,6 +84,7 @@ export class ProfileScreen extends React.Component {
       ,(e) => {
         this.setState({ progress: false, error: e.message });
       })
+    }
   }
 
   handleStateChange = async () => {
@@ -93,6 +102,27 @@ export class ProfileScreen extends React.Component {
     }
   }
 
+  showTerms = () => {
+    Alert.alert(
+      'Terms and Conditions',
+      termsText,
+      [
+        { text: 'Agree', onPress: async () => {
+          const { userId } = this.state;
+          if(userId) {
+            const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
+            const userArray = JSON.parse(acceptedUsers) || [];
+            userArray.push(userId);
+            await AsyncStorage.setItem('@acceptedUsers', JSON.stringify(userArray));
+          }
+
+        } },
+        { text: 'Disagree', onPress: () => this.logout(), style: 'cancel'}
+      ],
+      { cancelable: false }
+    );
+  }
+
   logout = async () => {
     const { navigation } = this.props;
  
@@ -104,7 +134,12 @@ export class ProfileScreen extends React.Component {
     })
     .finally(e => {
       AsyncStorage.getAllKeys()
-        .then(keys => AsyncStorage.multiRemove(keys))
+        .then(keys => {
+          if(keys.indexOf('@acceptedUsers') > -1) {
+            keys.splice(keys.indexOf('@acceptedUsers'), 1);
+          }
+          AsyncStorage.multiRemove(keys);
+        })
         .then(() => {
           navigation.dispatch(
             CommonActions.reset({
