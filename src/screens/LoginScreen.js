@@ -20,7 +20,6 @@ import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator } from '../core/utils';
 import configFile from '../../samples.config';
-import { errorMonitor } from 'events';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState({ value: '', error: '' });

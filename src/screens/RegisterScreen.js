@@ -162,7 +162,7 @@ const RegisterScreen = ({ navigation }) => {
             errorText={password.error}
             secureTextEntry
           />
-          <Button mode="contained" onPress={_onSignUpPressed} style={styles.button} disabled={!toggleCheckBox}>
+          <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
             Sign Up
           </Button>
 
