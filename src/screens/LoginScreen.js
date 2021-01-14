@@ -54,11 +54,11 @@ const LoginScreen = ({ navigation }) => {
         console.log('----response', response.data);
         if(status === 'MFA_REQUIRED') {
           const { stateToken } =  response.data;
-         
           const factorId = _embedded.factors[0].id;
-          const verifyLink = `${configFile.baseUri}/users/${userId}/factors/${factorId}/verify`; 
           
-          axios.post(verifyLink)
+          axios.post(`${configFile.baseUri}/authn/factors/${factorId}/verify`, {
+            stateToken,
+          })
             .then(verifyResponse => {
               console.log('----verifyresponse', verifyResponse.data);
               if(verifyResponse.data.factorResult === 'CHALLENGE') {
