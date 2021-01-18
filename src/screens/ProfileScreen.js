@@ -31,7 +31,7 @@ export class ProfileScreen extends React.Component {
     this.state = {
       accessToken: null,
       user: null,
-      progress: true,
+      progress: false,
       error: '',
       userId: null,
       idStatus: null,
@@ -42,9 +42,11 @@ export class ProfileScreen extends React.Component {
   }
 
   async componentDidMount() {
-    const { navigation } = this.props;
-    navigation.addListener('focus', this.handleStateChange);
-    this.handleStateChange();
+    const { navigation, route } = this.props;
+    navigation.addListener('focus', this.loadProfile);
+    
+    const incognito = route.params && route.params.incognito;
+    
     const uploadedID = await AsyncStorage.getItem('@uploadedID');
     if(uploadedID) {
       this.setState({ uploadedID });
@@ -53,51 +55,56 @@ export class ProfileScreen extends React.Component {
     if(idStatus) {
       this.setState({ idStatus });
     }
-  }
-
-  loadProfile = async () => {
-    this.setState({ progress: true });
     const accessToken = await AsyncStorage.getItem('@accessToken');
     if(accessToken) {
       this.setState({ accessToken });
-    }
-
-    let userId = await AsyncStorage.getItem('@userId');
-    if(userId) {
-      this.setState({ userId });
+      this.loadProfile();
     } else {
-      if(accessToken) {
-        const result =  jwt.decode(accessToken).claimsSet;
-        
-        userId = result.uid;
-        this.setState({ userId });
-      }
-    }
-
-    // Checking if the user accepted the permission
-    const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
-    const userArray = JSON.parse(acceptedUsers) || [];
-    if(userArray.indexOf(userId) < 0)  {
-      this.showTerms();
-    } else {
-      axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }}
-      )
-      .then(response => {
-        const { data } = response;
-        this.setState({ progress: false, user: data.profile });
-      }
-      ,(e) => {
-        console.log('error---', e.response);
-        this.setState({ progress: false, error: e.message });
-      })
+      const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+      navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito });
     }
   }
 
-  handleStateChange = async () => {
-    this.loadProfile();
+  loadProfile = async () => {
+    const { accessToken } = this.state;
+    if(accessToken) {
+      console.log('loadprofile---')
+      this.setState({ progress: true });
+      console.log(jwt.decode(accessToken).claimsSet);
+      let userId = await AsyncStorage.getItem('@userId');
+      if(userId) {
+        this.setState({ userId });
+      } else {
+        const result =  jwt.decode(accessToken).claimsSet;
+        userId = result.uid;
+        this.setState({ userId });
+      }
+
+      // Checking if the user accepted the permission
+      const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
+      const userArray = JSON.parse(acceptedUsers) || [];
+      if(userArray.indexOf(userId) < 0)  {
+        this.showTerms();
+      } else {
+        axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }}
+        )
+        .then(response => {
+          const { data } = response;
+          this.setState({ progress: false, user: data.profile });
+        }
+        ,(e) => {
+          console.log('error---', e.response);
+          this.setState({ progress: false, error: e.message });
+        })
+      }
+    }
+  }
+
+  onSignInSuccess = async(access_token) => {
+    await AsyncStorage.setItem('@accessToken', access_token);
   }
 
   transactionalMFA = async () => {
@@ -110,7 +117,7 @@ export class ProfileScreen extends React.Component {
       navigation.navigate('CustomWebView', { uri });
     } */
 
-    const uri = `${configFile.authUri}?client_id=${configFile.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+    const uri = `${configFile.authUri}?client_id=${configFile.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&prompt=none`;
     navigation.navigate('CustomWebView', { uri, onGoBack: (status) => this.displayBanner(status) });
   }
 
@@ -147,7 +154,7 @@ export class ProfileScreen extends React.Component {
     .then(() => {
     })
     .catch(async e => {
-      this.setState({ error: e.message })
+      //this.setState({ error: e.message })
     })
     .finally(e => {
       AsyncStorage.getAllKeys()

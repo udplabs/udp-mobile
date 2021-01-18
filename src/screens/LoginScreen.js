@@ -9,7 +9,7 @@ import {
 } from '@okta/okta-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
-
+import jwt from 'jwt-lite';
 import axios from 'axios';
 import Logo from '../components/Logo';
 import Background from '../components/Background';
@@ -51,7 +51,7 @@ const LoginScreen = ({ navigation }) => {
       .then(async response => {
         const { data: { _embedded, status } } = response;
         const userId = _embedded.user.id;
-        console.log('----response', response.data);
+
         if(status === 'MFA_REQUIRED') {
           const { stateToken } =  response.data;
           const factorId = _embedded.factors[0].id;
@@ -60,7 +60,6 @@ const LoginScreen = ({ navigation }) => {
             stateToken,
           })
             .then(verifyResponse => {
-              console.log('----verifyresponse', verifyResponse.data);
               if(verifyResponse.data.factorResult === 'CHALLENGE') {
                 Alert.prompt(
                   "Enter passcode",
@@ -80,16 +79,19 @@ const LoginScreen = ({ navigation }) => {
                         })
                           .then(async activateResponse => {
                             const { status, sessionToken } = activateResponse.data;
-                            console.log('----activateResponse', activateResponse.data);
+                           
                             if(status === 'SUCCESS') {
                               await AsyncStorage.setItem('@userId', userId);
                               await AsyncStorage.setItem('@sessionToken', sessionToken);
                               await AsyncStorage.removeItem('@accessToken');
+                              
                               navigation.dispatch(
                                 CommonActions.reset({
                                   index: 0,
                                   routes: [
-                                    { name: 'Profile' },
+                                    { name: 'Profile',
+                                      params: { incognito: true }
+                                    },
                                   ],
                                 })
                               );
@@ -138,7 +140,9 @@ const LoginScreen = ({ navigation }) => {
             CommonActions.reset({
               index: 0,
               routes: [
-                { name: 'Profile' },
+                { name: 'Profile',
+                  params: { incognito: true }
+                },
               ],
             })
           );
@@ -160,7 +164,10 @@ const LoginScreen = ({ navigation }) => {
   };
   
   _onWebLoginPressed = () => {
-    signIn();
+    //signIn();
+    const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+    console.log('uri---', uri);
+    navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito: true});
   }
 
   const _onTouchIDPressed = async () => {
@@ -204,6 +211,21 @@ const LoginScreen = ({ navigation }) => {
     }
   }
 
+  onSignInSuccess = async(access_token) => {
+    await AsyncStorage.setItem('@accessToken', access_token);
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Profile',
+            params: { incognito: false }
+          },
+        ],
+      })
+    );
+  }
+  /*
   useEffect(() => {
     EventEmitter.addListener('signInSuccess', async function(e) {
       await AsyncStorage.setItem('@accessToken', e.access_token);
@@ -240,6 +262,7 @@ const LoginScreen = ({ navigation }) => {
       EventEmitter.removeAllListeners('onCancelled');
     };
   }, []);
+*/
 
   checkAuthentication = async () => {
     const result = await isAuthenticated();
