@@ -1,18 +1,19 @@
 import React, { memo, useEffect, useState, useRef } from 'react';
-import { View, Alert, StyleSheet, Dimensions } from 'react-native';
-
+import { View, Alert, StyleSheet } from 'react-native';
+import axios from 'axios';
 import Background from '../components/Background';
 import BackButton from '../components/BackButton';
 import Header from '../components/Header';
 import TextInput from '../components/TextInput';
 import Button from '../components/Button';
-import axios from '../components/Axios';
+
 import {
   emailValidator,
   nameValidator,
   phoneNumberValidator,
 } from '../core/utils';
 import configFile from '../../samples.config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const EditProfileScreen = ({ route, navigation }) => {
@@ -39,7 +40,8 @@ const EditProfileScreen = ({ route, navigation }) => {
     
   }, [route.pararms]);
 
-  _onSave = () => {
+  _onSave = async () => {
+    const accessToken = await AsyncStorage.getItem('@accessToken');
     if(page === 0) {
       const firstNameError = nameValidator(firstName.value);
       const lastNameError = nameValidator(lastName.value);
@@ -61,7 +63,7 @@ const EditProfileScreen = ({ route, navigation }) => {
         }
         return;
       }
-      axios.put(`${configFile.baseUri}/users/${userId}`, {
+      axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
         profile: {
           firstName: firstName.value,
           lastName: lastName.value,
@@ -75,6 +77,10 @@ const EditProfileScreen = ({ route, navigation }) => {
               value: password.value,
             }
           }
+        },
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
         }
       })
       .then(response => {
