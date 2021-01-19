@@ -287,8 +287,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold'
   },
-  verified: {
-    marginTop: 20,
-    color: 'green',
-  }
 });

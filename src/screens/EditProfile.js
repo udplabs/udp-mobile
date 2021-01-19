@@ -1,5 +1,5 @@
-import React, { memo, useEffect, useState, Text } from 'react';
-import { View, Alert, StyleSheet } from 'react-native';
+import React, { memo, useEffect, useState } from 'react';
+import { View, Alert, StyleSheet, Text } from 'react-native';
 import axios from 'axios';
 import Background from '../components/Background';
 import BackButton from '../components/BackButton';
@@ -41,6 +41,7 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     async function getIdStatus () {
       const idStatus = await AsyncStorage.getItem('@idStatus');
+      console.log('-----', idStatus)
       if(idStatus) {
         setIdStatus(idStatus);
       }
@@ -103,7 +104,7 @@ const EditProfileScreen = ({ route, navigation }) => {
           status
         }
       } = response;
-
+      console.log('status---', status);
       setIdStatus(status);
 
       await AsyncStorage.setItem('@idStatus', status);
@@ -236,19 +237,6 @@ const EditProfileScreen = ({ route, navigation }) => {
           <Button mode="contained" onPress={_onSave} style={styles.button}>
             Save and Continue
           </Button>
-
-          {
-            idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
-          }
-          <Button onPress={uploadID} mode="outlined">
-            Upload a new ID
-          </Button>
-          {
-            idStatus === 'Pending' && <Button onPress={verifyId} mode="outlined">
-              Check Status
-            </Button>
-          }
-            
         </View>
       )
     }
@@ -304,6 +292,17 @@ const EditProfileScreen = ({ route, navigation }) => {
         </View>
       </View>
     )}
+    {
+      !!idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
+    }
+    <Button onPress={uploadID} mode="outlined">
+      Upload a new ID
+    </Button>
+    {
+      idStatus === 'Pending' && <Button onPress={verifyId} mode="outlined">
+        Check Status
+      </Button>
+    }
     </View>
   </Background>
 };
@@ -332,6 +331,10 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%'
+  },
+  verified: {
+    marginTop: 20,
+    color: 'green',
   }
 });
 
