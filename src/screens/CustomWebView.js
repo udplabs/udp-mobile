@@ -1,9 +1,8 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { View, Dimensions } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import Button from '../components/Button';
 
@@ -11,6 +10,7 @@ const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const CustomWebView = ({ route, navigation }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const { uri, onGoBack, incognito } = route.params;
 
   onLoad = async(state) => {
@@ -23,7 +23,7 @@ const CustomWebView = ({ route, navigation }) => {
       }
       const { access_token } = params;
       onGoBack(true, access_token);
-      //await AsyncStorage.setItem('@accessToken', access_token);
+      
       
       await navigation.goBack(null);
     } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
@@ -51,7 +51,13 @@ const CustomWebView = ({ route, navigation }) => {
       >
         Close
       </Button>
+      <Spinner
+        visible={isLoading}
+        textContent={'Loading...'}
+        textStyle={{ color: '#FFF' }}
+      />
       <WebView
+        onLoad={() => setIsLoading(false)}
         source={{ uri }}
         onNavigationStateChange={onLoad}
         incognito={incognito}
