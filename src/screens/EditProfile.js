@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, useRef } from 'react';
+import React, { memo, useEffect, useState, Text } from 'react';
 import { View, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
 import Background from '../components/Background';
@@ -25,6 +25,7 @@ const EditProfileScreen = ({ route, navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState({ value: '', error: '' });
   const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
   const [page, setPage] = useState(0);
+  const [idStatus, setIdStatus] = useState(null);
 
   useEffect(() => {
     const { user, userId } = route.params;
@@ -37,11 +38,96 @@ const EditProfileScreen = ({ route, navigation }) => {
       setEmail({ value: user.email, error: '' });
       setPhoneNumber({ value: user.primaryPhone, error: '' });
     }
+
+    async function getIdStatus () {
+      const idStatus = await AsyncStorage.getItem('@idStatus');
+      if(idStatus) {
+        setIdStatus(idStatus);
+      }
+    }
     
+    getIdStatus();
   }, [route.pararms]);
 
+  uploadID = () => {
+    const { accessToken } = route.params;
+    if(accessToken) {
+      axios.post(`${configFile.customUrl}/evidentio/token`, {
+        subdomain: "udp-mobile",
+        app: "udp-mobile",
+      }, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => {
+        const { data: {
+          id,
+          _links: {
+            url
+          }
+        }} = response;
+        navigation.navigate('IDVerification', { uri: url, id, onGoBack: () => verifyId() });
+      }
+      ,(e) => {
+        console.log('error--', e.response);
+        Alert.alert(
+          'Error',
+          'An alert has occured, please try again later',
+          [
+            { text: 'OK', onPress: () => {} }
+          ],
+          { cancelable: false }
+        );
+      })
+    }
+  }
+
+  verifyId = async () => {
+    const { accessToken } = route.params;
+    const id = await AsyncStorage.getItem('@uploadedID');
+    axios.post(`${configFile.customUrl}/evidentio/updateidentity`, {
+      evident_id: id,
+      subdomain: "udp-mobile",
+      app: "udp-mobile",
+    }, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(async(response) => {
+      const {
+        data: {
+          status
+        }
+      } = response;
+
+      setIdStatus(status);
+
+      await AsyncStorage.setItem('@idStatus', status);
+      if(status === 'Verified') {
+        await AsyncStorage.removeItem('@uploadedID');
+      }
+      //this.loadProfile();
+    }
+    ,(e) => {
+      console.log('----verifyError: ', e.response);
+      Alert.alert(
+        'Error',
+        'An alert has occured, please try again later',
+        [
+          { text: 'OK', onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    })
+
+  }
+
   _onSave = async () => {
-    const accessToken = await AsyncStorage.getItem('@accessToken');
+    const { accessToken } = route.params;
     if(page === 0) {
       const firstNameError = nameValidator(firstName.value);
       const lastNameError = nameValidator(lastName.value);
@@ -151,6 +237,18 @@ const EditProfileScreen = ({ route, navigation }) => {
             Save and Continue
           </Button>
 
+          {
+            idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
+          }
+          <Button onPress={uploadID} mode="outlined">
+            Upload a new ID
+          </Button>
+          {
+            idStatus === 'Pending' && <Button onPress={verifyId} mode="outlined">
+              Check Status
+            </Button>
+          }
+            
         </View>
       )
     }

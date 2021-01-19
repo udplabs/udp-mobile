@@ -2,10 +2,8 @@ import React, { memo, useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import {
-  signIn,
   isAuthenticated,
   getUserFromIdToken,
-  EventEmitter,
 } from '@okta/okta-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';

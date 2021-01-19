@@ -34,8 +34,6 @@ export class ProfileScreen extends React.Component {
       progress: false,
       error: '',
       userId: null,
-      idStatus: null,
-      uploadedID: null,
       bannerVisible: false,
       message: successMessage,
     };
@@ -47,14 +45,6 @@ export class ProfileScreen extends React.Component {
     
     const incognito = route.params && route.params.incognito;
     
-    const uploadedID = await AsyncStorage.getItem('@uploadedID');
-    if(uploadedID) {
-      this.setState({ uploadedID });
-    }
-    const idStatus = await AsyncStorage.getItem('@idStatus');
-    if(idStatus) {
-      this.setState({ idStatus });
-    }
     const accessToken = await AsyncStorage.getItem('@accessToken');
     if(accessToken) {
       this.setState({ accessToken });
@@ -96,8 +86,21 @@ export class ProfileScreen extends React.Component {
           this.setState({ progress: false, user: data.profile });
         }
         ,(e) => {
-          console.log('error---', e.response);
-          this.setState({ progress: false, error: e.message });
+
+          if(e.response && e.response.data && e.response.data.message === 'Unauthorized') {
+            Alert.alert(
+              'Error',
+              'Session has expired. Please try to login again',
+              [
+                { text: 'OK', onPress: async () => {
+                  this.logout();
+                }
+                }
+              ]
+            );
+          } else {
+            this.setState({ progress: false, error: e.message });
+          }
         })
       }
     }
@@ -177,89 +180,9 @@ export class ProfileScreen extends React.Component {
     });
   }
 
-  uploadID = () => {
-    const { accessToken } = this.state;
-    const { navigation } = this.props;
-    if(accessToken) {
-
-      axios.post(`${configFile.customUrl}/evidentio/token`, {
-        subdomain: "udp-mobile",
-        app: "udp-mobile",
-      }, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => {
-        const { data: {
-          id,
-          _links: {
-            url
-          }
-        }} = response;
-        navigation.navigate('IDVerification', { uri: url, id, onGoBack: () => this.verifyId() });
-      }
-      ,(e) => {
-        console.log('error--', e.response);
-        Alert.alert(
-          'Error',
-          'An alert has occured, please try again later',
-          [
-            { text: 'OK', onPress: () => {} }
-          ],
-          { cancelable: false }
-        );
-      })
-    }
-  }
-
-  verifyId = async () => {
-    const { accessToken } = this.state;
-    const id = await AsyncStorage.getItem('@uploadedID');
-    const self = this;
-    axios.post(`${configFile.customUrl}/evidentio/updateidentity`, {
-      evident_id: id,
-      subdomain: "udp-mobile",
-      app: "udp-mobile",
-    }, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      }
-    })
-    .then(async(response) => {
-      const {
-        data: {
-          status
-        }
-      } = response;
-
-      self.setState({ idStatus: status });
-
-      await AsyncStorage.setItem('@idStatus', status);
-      if(status === 'Verified') {
-        await AsyncStorage.removeItem('@uploadedID');
-      }
-      this.loadProfile();
-    }
-    ,(e) => {
-      console.log('----verifyError: ', e.response);
-      Alert.alert(
-        'Error',
-        'An alert has occured, please try again later',
-        [
-          { text: 'OK', onPress: () => {} }
-        ],
-        { cancelable: false }
-      );
-    })
-
-  }
-
   render() {
     const { navigation } = this.props;
-    const { user, accessToken, error, progress, userId, idStatus, message, bannerVisible } = this.state;
+    const { user, accessToken, error, progress, userId, message, bannerVisible } = this.state;
 
     return (
       <Background>
@@ -268,7 +191,7 @@ export class ProfileScreen extends React.Component {
           <View style={styles.container}>
             <View style={styles.headerRow}>
               <Header>Profile</Header>
-              <Button style={{ flexDirection: 'row' }} onPress={() => navigation.navigate('EditProfile', { user, userId })}>Edit</Button>
+              <Button style={{ flexDirection: 'row' }} onPress={() => navigation.navigate('EditProfile', { user, userId, accessToken })}>Edit</Button>
             </View>
             
             <Spinner
@@ -298,20 +221,7 @@ export class ProfileScreen extends React.Component {
               {
                 accessToken && <Button style={{ marginTop: 40 }} onPress={this.transactionalMFA} >Transactional MFA</Button>
               }
-              <View style={styles.row}>
-                {
-                  idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
-                }
-                <Button onPress={this.uploadID} mode="outlined">
-                  Upload a new ID
-                </Button>
-                {
-                  idStatus === 'Pending' && <Button onPress={this.verifyId} mode="outlined">
-                    Check Status
-                  </Button>
-                }
-                
-              </View>
+             
               <View style={styles.row}>
                 <Button onPress={this.logout} mode="outlined">
                   Logout
