@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import {

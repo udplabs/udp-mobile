@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import jwt from 'jwt-lite';
-import { Snackbar } from 'react-native-paper';
+
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearTokens } from '@okta/okta-react-native';
@@ -205,7 +205,7 @@ export class ProfileScreen extends React.Component {
                 </View>
               }
               {
-                accessToken && <Button style={{ marginTop: 40 }} onPress={this.transactionalMFA} >Transactional MFA</Button>
+                accessToken && <Button style={{ marginTop: 40 }} onPress={this.transactionalMFA} >Transactions</Button>
               }
              
               <View style={styles.row}>

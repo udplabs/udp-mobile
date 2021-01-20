@@ -5,6 +5,7 @@ import { View, Text, SafeAreaView } from 'react-native';
 import { isAuthenticated } from '@okta/okta-react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Provider } from 'react-native-paper';
 import {
   HomeScreen,
   LoginScreen,
@@ -95,36 +96,38 @@ const App = () => {
 
 const Root = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator headerMode="none" mode="modal">
-        <Stack.Screen 
-          name="Home" 
-          component={App}
-          options={{ title: 'App', headerLeft: null }} 
-        />
-        <Stack.Screen 
-          name="SocialLoginModal" 
-          component={SocialLoginModal} 
-          options={{
-            cardStyle: { backgroundColor: 'transparent' }
-          }} 
-        />
-        <Stack.Screen 
-          name="CustomWebView" 
-          component={CustomWebView} 
-          options={{
-            cardStyle: { backgroundColor: 'transparent' }
-          }} 
-        />
-        <Stack.Screen 
-          name="IDVerification" 
-          component={IDVerification} 
-          options={{
-            cardStyle: { backgroundColor: 'transparent' }
-          }} 
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider>
+      <NavigationContainer>
+        <Stack.Navigator headerMode="none" mode="modal">
+          <Stack.Screen 
+            name="Home" 
+            component={App}
+            options={{ title: 'App', headerLeft: null }} 
+          />
+          <Stack.Screen 
+            name="SocialLoginModal" 
+            component={SocialLoginModal} 
+            options={{
+              cardStyle: { backgroundColor: 'transparent' }
+            }} 
+          />
+          <Stack.Screen 
+            name="CustomWebView" 
+            component={CustomWebView} 
+            options={{
+              cardStyle: { backgroundColor: 'transparent' }
+            }} 
+          />
+          <Stack.Screen 
+            name="IDVerification" 
+            component={IDVerification} 
+            options={{
+              cardStyle: { backgroundColor: 'transparent' }
+            }} 
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   )
 };
 export default Root;
