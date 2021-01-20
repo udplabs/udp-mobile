@@ -7,3 +7,4 @@ export { default as EditProfileScreen } from './EditProfile';
 export { default as SocialLoginModal } from './SocialLoginModal';
 export { default as CustomWebView } from './CustomWebView';
 export { default as IDVerification } from './IDVerification';
+export { default as TransactionScreen } from './TransactionScreen';

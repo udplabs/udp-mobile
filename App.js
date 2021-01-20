@@ -15,6 +15,7 @@ import {
   SocialLoginModal,
   CustomWebView,
   IDVerification,
+  TransactionScreen,
 } from './src/screens';
 
 const Stack = createStackNavigator();
@@ -82,6 +83,11 @@ const App = () => {
         name="Profile" 
         component={ProfileScreen} 
         options={{ title: 'User Profile'}} 
+      />
+       <Stack.Screen 
+        name="Transaction" 
+        component={TransactionScreen} 
+        options={{ title: 'Transaction'}} 
       />
     </Stack.Navigator>
   )

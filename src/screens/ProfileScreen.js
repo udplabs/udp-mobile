@@ -22,7 +22,7 @@ import Error from '../components/Error';
 import configFile from '../../samples.config';
 
 const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-const successMessage = 'Transaction has been successfully authorized.';
+
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
@@ -34,8 +34,7 @@ export class ProfileScreen extends React.Component {
       progress: false,
       error: '',
       userId: null,
-      bannerVisible: false,
-      message: successMessage,
+
     };
   }
 
@@ -58,9 +57,7 @@ export class ProfileScreen extends React.Component {
   loadProfile = async () => {
     const { accessToken } = this.state;
     if(accessToken) {
-      console.log('loadprofile---')
       this.setState({ progress: true });
-      console.log(jwt.decode(accessToken).claimsSet);
       let userId = await AsyncStorage.getItem('@userId');
       if(userId) {
         this.setState({ userId });
@@ -112,20 +109,9 @@ export class ProfileScreen extends React.Component {
 
   transactionalMFA = async () => {
     const { navigation } = this.props;
+   
     const { accessToken } = this.state;
-    /* if(!accessToken) {
-      const sessionToken = await AsyncStorage.getItem('@sessionToken');
-      const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&sessionToken=${sessionToken}&prompt=none`;
-
-      navigation.navigate('CustomWebView', { uri });
-    } */
-
-    const uri = `${configFile.authUri}?client_id=${configFile.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&prompt=none`;
-    navigation.navigate('CustomWebView', { uri, onGoBack: (status) => this.displayBanner(status) });
-  }
-
-  displayBanner = (status) => {
-    this.setState({ message: status ? successMessage : 'An error has occured.', bannerVisible: true });
+    navigation.navigate('Transaction', { accessToken });
   }
 
   showTerms = () => {
@@ -182,7 +168,7 @@ export class ProfileScreen extends React.Component {
 
   render() {
     const { navigation } = this.props;
-    const { user, accessToken, error, progress, userId, message, bannerVisible } = this.state;
+    const { user, accessToken, error, progress, userId } = this.state;
 
     return (
       <Background>
@@ -230,18 +216,6 @@ export class ProfileScreen extends React.Component {
             </View>
           </View>
         </ScrollView>
-        <Snackbar
-          visible={bannerVisible}
-          action={{
-            label: 'OK',
-            onPress: () => {
-              this.setState({ bannerVisible: false });
-            },
-          }}
-          onDismiss={() => {}}
-        >
-          {message}
-        </Snackbar>
       </Background>
     );
   }
