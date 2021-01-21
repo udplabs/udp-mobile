@@ -109,9 +109,9 @@ export class ProfileScreen extends React.Component {
 
   transactionalMFA = async () => {
     const { navigation } = this.props;
-   
-    const { accessToken } = this.state;
-    navigation.navigate('Transaction', { accessToken });
+    const { accessToken, user, userId } = this.state;
+
+    navigation.navigate('Transaction', { accessToken, user, userId });
   }
 
   showTerms = () => {

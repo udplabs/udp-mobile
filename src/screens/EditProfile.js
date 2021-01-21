@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { View, Alert, StyleSheet, Text } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Background from '../components/Background';
 import BackButton from '../components/BackButton';
 import Header from '../components/Header';
@@ -13,7 +14,7 @@ import {
   phoneNumberValidator,
 } from '../core/utils';
 import configFile from '../../samples.config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 const EditProfileScreen = ({ route, navigation }) => {
