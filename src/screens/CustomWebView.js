@@ -1,9 +1,7 @@
 import React, { memo, useState } from 'react';
-import { View, Dimensions } from 'react-native'
+import { View, Dimensions, ActivityIndicator } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { createStackNavigator } from '@react-navigation/stack';
-import Spinner from 'react-native-loading-spinner-overlay';
-
 import Button from '../components/Button';
 
 const width = Dimensions.get('window').width;
@@ -51,11 +49,9 @@ const CustomWebView = ({ route, navigation }) => {
       >
         Close
       </Button>
-      <Spinner
-        visible={isLoading}
-        textContent={'Loading...'}
-        textStyle={{ color: '#FFF' }}
-      />
+      {
+        isLoading && <ActivityIndicator size="large" />
+      }
       <WebView
         onLoad={() => setIsLoading(false)}
         source={{ uri }}

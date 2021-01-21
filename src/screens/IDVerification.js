@@ -1,9 +1,8 @@
 import React, { memo, useState } from 'react';
-import { View, Dimensions } from 'react-native'
+import { View, Dimensions, ActivityIndicator } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Spinner from 'react-native-loading-spinner-overlay';
 import Button from '../components/Button';
 
 const width = Dimensions.get('window').width;
@@ -41,11 +40,9 @@ const IDVerification = ({ route, navigation }) => {
       >
         Close
       </Button>
-      <Spinner
-        visible={isLoading}
-        textContent={'Loading...'}
-        textStyle={{ color: '#FFF' }}
-      />
+      {
+        isLoading && <ActivityIndicator size="large" />
+      }
       <WebView
         source={{ uri }}
         onLoad={() => setIsLoading(false)}

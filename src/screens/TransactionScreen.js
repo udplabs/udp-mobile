@@ -7,6 +7,7 @@ import {
   TextInput as Input,
   Modal,
 } from 'react-native-paper';
+import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 import DropDown from 'react-native-paper-dropdown';
 import BackButton from '../components/BackButton';
@@ -70,6 +71,7 @@ const TransactionScreen = ({ route, navigation }) => {
   const [amountError, setAmountError] = useState(null);
   const [fields, setFields] = useState([]);
   const [modalVisible, setModalVisible] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [modalValues, setModalValues] = useState({
     zipCode: {
       value: '',
@@ -137,6 +139,7 @@ const TransactionScreen = ({ route, navigation }) => {
 
   onUpdateProfile = () => {
     const { accessToken, userId, user } = route.params;
+    setLoading(true);
     axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
       profile: {
         ...user,
@@ -155,7 +158,10 @@ const TransactionScreen = ({ route, navigation }) => {
         'Success',
         'Your profile was updated successfully.',
         [
-          { text: 'OK', onPress: () => setModalVisible(false) }
+          { text: 'OK', onPress: () => {
+            setModalVisible(false);
+            setLoading(false);
+          } }
         ],
         { cancelable: false }
       );
@@ -165,7 +171,7 @@ const TransactionScreen = ({ route, navigation }) => {
         'Error',
         'An error has occured, please try again.',
         [
-          { text: 'OK', onPress: () => console.log('error', error.response.data) }
+          { text: 'OK', onPress: () => { setLoading(false)} }
         ],
         { cancelable: false }
       );
@@ -175,7 +181,11 @@ const TransactionScreen = ({ route, navigation }) => {
   return (
     <>
       <Background>
-      
+        <Spinner
+          visible={loading}
+          textContent={'Loading...'}
+          textStyle={styles.spinnerTextStyle}
+        />
         <BackButton goBack={() => navigation.goBack()} />
         <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
@@ -323,7 +333,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     margin: 20,
-  }
+  },
+  spinnerTextStyle: {
+    color: '#FFF',
+  },
 });
 
 export default memo(TransactionScreen);

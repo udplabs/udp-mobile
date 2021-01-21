@@ -1,7 +1,8 @@
 import React, { memo, useEffect, useState } from 'react';
-import { View, Alert, StyleSheet, Text } from 'react-native';
+import { View, Alert, StyleSheet, Text, ScrollView } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Spinner from 'react-native-loading-spinner-overlay';
 import Background from '../components/Background';
 import BackButton from '../components/BackButton';
 import Header from '../components/Header';
@@ -25,8 +26,13 @@ const EditProfileScreen = ({ route, navigation }) => {
   const [password, setPassword] = useState({ value: '', error: '' });
   const [confirmPassword, setConfirmPassword] = useState({ value: '', error: '' });
   const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
+  const [zipCode, setZipCode] = useState({ value: '', error: '' });
+  const [streetAddress, setStreetAddress] = useState({ value: '', error: '' });
+  const [city, setCity] = useState({ value: '', error: '' });
+  const [state, setState] = useState({ value: '', error: '' });
   const [page, setPage] = useState(0);
   const [idStatus, setIdStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const { user, userId } = route.params;
@@ -38,6 +44,10 @@ const EditProfileScreen = ({ route, navigation }) => {
       setLastName({ value: user.lastName, error: '' });
       setEmail({ value: user.email, error: '' });
       setPhoneNumber({ value: user.primaryPhone, error: '' });
+      setZipCode({ value: user.zipCode, error: ''});
+      setCity({ value: user.city, error: ''});
+      setStreetAddress({ value: user.streetAddress, error: ''});
+      setState({ value: user.state, error: ''});
     }
 
     async function getIdStatus () {
@@ -54,6 +64,7 @@ const EditProfileScreen = ({ route, navigation }) => {
   uploadID = () => {
     const { accessToken } = route.params;
     if(accessToken) {
+      setLoading(true);
       axios.post(`${configFile.customUrl}/evidentio/token`, {
         subdomain: "udp-mobile",
         app: "udp-mobile",
@@ -70,15 +81,15 @@ const EditProfileScreen = ({ route, navigation }) => {
             url
           }
         }} = response;
+        setLoading(false);
         navigation.navigate('IDVerification', { uri: url, id, onGoBack: () => verifyId() });
       }
       ,(e) => {
-        console.log('error--', e.response);
         Alert.alert(
           'Error',
           'An alert has occured, please try again later',
           [
-            { text: 'OK', onPress: () => {} }
+            { text: 'OK', onPress: () => {setLoading(false);} }
           ],
           { cancelable: false }
         );
@@ -89,6 +100,7 @@ const EditProfileScreen = ({ route, navigation }) => {
   verifyId = async () => {
     const { accessToken } = route.params;
     const id = await AsyncStorage.getItem('@uploadedID');
+    setLoading(true);
     axios.post(`${configFile.customUrl}/evidentio/updateidentity`, {
       evident_id: id,
       subdomain: "udp-mobile",
@@ -105,14 +117,13 @@ const EditProfileScreen = ({ route, navigation }) => {
           status
         }
       } = response;
-      console.log('status---', status);
       setIdStatus(status);
-
+      setLoading(false);
       await AsyncStorage.setItem('@idStatus', status);
       if(status === 'Verified') {
         await AsyncStorage.removeItem('@uploadedID');
+        loadProfile();
       }
-      //this.loadProfile();
     }
     ,(e) => {
       console.log('----verifyError: ', e.response);
@@ -120,12 +131,49 @@ const EditProfileScreen = ({ route, navigation }) => {
         'Error',
         'An alert has occured, please try again later',
         [
-          { text: 'OK', onPress: () => {} }
+          { text: 'OK', onPress: () => {setLoading(false)} }
         ],
         { cancelable: false }
       );
     })
 
+  }
+
+  loadProfile = () => {
+    const { accessToken, userId } = route.params;
+    if(accessToken) {
+      setLoading(true);
+      // Checking if the user accepted the permission
+      
+      axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }}
+      )
+      .then(response => {
+        setLoading(false);
+        const { data } = response;
+        const user = data.profile;
+        setFirstName({ value: user.firstName, error: '' });
+        setLastName({ value: user.lastName, error: '' });
+        setEmail({ value: user.email, error: '' });
+        setPhoneNumber({ value: user.primaryPhone, error: '' });
+        setZipCode({ value: user.zipCode, error: ''});
+        setCity({ value: user.city, error: ''});
+        setStreetAddress({ value: user.streetAddress, error: ''});
+        setState({ value: user.state, error: ''});
+      }
+      ,(e) => {
+        Alert.alert(
+          'Error',
+          'An alert has occured, please try again later',
+          [
+            { text: 'OK', onPress: () => {setLoading(false)} }
+          ],
+          { cancelable: false }
+        );
+      })
+    }
   }
 
   _onSave = async () => {
@@ -134,16 +182,13 @@ const EditProfileScreen = ({ route, navigation }) => {
       const firstNameError = nameValidator(firstName.value);
       const lastNameError = nameValidator(lastName.value);
       const emailError = emailValidator(email.value);
-    
+      const phoneNumberError = phoneNumberValidator(phoneNumber.value);
       if (emailError || lastNameError || firstNameError) {
         setFirstName({ ...firstName, error: firstNameError });
         setLastName({ ...lastName, error: lastNameError });
         setEmail({ ...email, error: emailError });
         return;
       }
-      setPage(1);
-    } else if(page === 1) {
-      const phoneNumberError = phoneNumberValidator(phoneNumber.value);
       if (phoneNumberError) {
         setPhoneNumber({ ...phoneNumber, error: phoneNumberError });
         if(password.value !== confirmPassword.value) {
@@ -151,6 +196,9 @@ const EditProfileScreen = ({ route, navigation }) => {
         }
         return;
       }
+      setPage(1);
+    } else if(page === 1) {
+      setLoading(true);
       axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
         profile: {
           firstName: firstName.value,
@@ -158,6 +206,10 @@ const EditProfileScreen = ({ route, navigation }) => {
           email: email.value,
           login: email.value,
           primaryPhone: phoneNumber.value,
+          zipCode: zipCode.value,
+          streetAddress: streetAddress.value,
+          city: city.value,
+          state: state.value,
         },
         ...password.value && {
           credentials: {
@@ -176,17 +228,18 @@ const EditProfileScreen = ({ route, navigation }) => {
           'Success',
           'Your profile was updated successfully.',
           [
-            { text: 'OK', onPress: () =>{ navigation.goBack(null)} }
+            { text: 'OK', onPress: () =>{ setLoading(false) } }
           ],
           { cancelable: false }
         );
       }
       ,(error) => {
+        
         Alert.alert(
           'Error',
           'An error has occured, please try again.',
           [
-            { text: 'OK', onPress: () => console.log('error', error.response) }
+            { text: 'OK', onPress: () => {setLoading(false)} }
           ],
           { cancelable: false }
         );
@@ -201,7 +254,13 @@ const EditProfileScreen = ({ route, navigation }) => {
   return <Background>
     <BackButton goBack={() => navigation.goBack()} />
     <View style={styles.container}>
+      <Spinner
+        visible={loading}
+        textContent={'Loading...'}
+        textStyle={styles.spinnerTextStyle}
+      />
       <Header>Edit Profile</Header>
+      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
       { page === 0 && (
         <View style={styles.inputContainer}>
           <TextInput
@@ -235,6 +294,24 @@ const EditProfileScreen = ({ route, navigation }) => {
             keyboardType="email-address"
           />
 
+          <TextInput
+            keyboardType="numeric"
+            returnKeyType="next"
+            placeholder='Enter mobile number'
+            label="Mobile number"
+            value={phoneNumber.value}
+            error={!!phoneNumber.error}
+            errorText={phoneNumber.error}
+            onChangeText={(value) => {
+              let num = value.replace(".", '');
+              if(isNaN(num)){
+                  // Its not a number
+              }else{
+                  setPhoneNumber({ value: num, error: ''})}  
+              }
+            }
+          />
+
           <Button mode="contained" onPress={_onSave} style={styles.button}>
             Save and Continue
           </Button>
@@ -245,23 +322,44 @@ const EditProfileScreen = ({ route, navigation }) => {
       page === 1 && (
       <View style={styles.inputContainer}>
         <TextInput
-          keyboardType="numeric"
+          label="Zip code"
           returnKeyType="next"
-          placeholder='Enter mobile number'
-          label="Mobile number"
-          value={phoneNumber.value}
-          error={!!phoneNumber.error}
-          errorText={phoneNumber.error}
-          onChangeText={(value) => {
-            let num = value.replace(".", '');
-            if(isNaN(num)){
-                // Its not a number
-            }else{
-                setPhoneNumber({ value: num, error: ''})}  
-            }
-          }
+          value={zipCode.value}
+          onChangeText={text => setZipCode({ value: text, error: '' })}
+          error={!!zipCode.error}
+          errorText={zipCode.error}
+          autoCapitalize="none"
+          autoCompleteType="postal-code"
+          textContentType="postalCode"
         />
-
+        <TextInput
+          label="Street address"
+          returnKeyType="next"
+          value={streetAddress.value}
+          onChangeText={text => setStreetAddress({ value: text, error: '' })}
+          error={!!streetAddress.error}
+          errorText={streetAddress.error}
+          autoCompleteType="street-address"
+          textContentType="fullStreetAddress"
+        />
+        <TextInput
+          label="City"
+          returnKeyType="next"
+          value={city.value}
+          onChangeText={text => setCity({ value: text, error: '' })}
+          error={!!city.error}
+          errorText={city.error}
+          textContentType="addressCity"
+        />
+        <TextInput
+          label="State"
+          returnKeyType="next"
+          value={state.value}
+          onChangeText={text => setState({ value: text, error: '' })}
+          error={!!state.error}
+          errorText={state.error}
+          textContentType="addressState"
+        />
         <TextInput
           label="Password"
           placeholder="Password"
@@ -304,7 +402,9 @@ const EditProfileScreen = ({ route, navigation }) => {
         Check Status
       </Button>
     }
+     </ScrollView>
     </View>
+   
   </Background>
 };
 
@@ -336,7 +436,10 @@ const styles = StyleSheet.create({
   verified: {
     marginTop: 20,
     color: 'green',
-  }
+  },
+  spinnerTextStyle: {
+    color: '#FFF',
+  },
 });
 
 
