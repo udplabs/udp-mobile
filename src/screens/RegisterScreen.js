@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import ConfirmGoogleCaptcha from 'react-native-google-recaptcha-v2';
 
-import axios from '../components/Axios';
+import axios from 'axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';

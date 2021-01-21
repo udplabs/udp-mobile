@@ -39,21 +39,22 @@ export class ProfileScreen extends React.Component {
 
   async componentDidMount() {
     const { navigation, route } = this.props;
-    navigation.addListener('focus', this.loadProfile);
-    
     const incognito = route.params && route.params.incognito;
     
     const accessToken = await AsyncStorage.getItem('@accessToken');
     if(accessToken) {
-      this.setState({ accessToken });
-      this.loadProfile();
+      this.setState({ accessToken }, () => {
+        this.loadProfile();
+        navigation.addListener('focus', this.loadProfile);
+      });
     } else {
       const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito });
+      navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito: false });
     }
   }
 
   loadProfile = async () => {
+    console.log('loadprofile--', this.loadProfile);
     const { accessToken } = this.state;
     if(accessToken) {
       this.setState({ progress: true });

@@ -117,7 +117,7 @@ const TransactionScreen = ({ route, navigation }) => {
     } else {
       setAmountError(null);
       const uri = `${configFile.authUri}?client_id=${configFile.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status) }, false);
+      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status), incognito: false }, );
     }
   }
 

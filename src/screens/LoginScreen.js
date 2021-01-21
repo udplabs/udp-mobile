@@ -165,7 +165,7 @@ const LoginScreen = ({ navigation }) => {
     //signIn();
     const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
     console.log('uri---', uri);
-    navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito: true});
+    navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito: false});
   }
 
   const _onTouchIDPressed = async () => {
