@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import jwt from 'jwt-lite';
 
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';

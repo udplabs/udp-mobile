@@ -13,6 +13,7 @@ import DropDown from 'react-native-paper-dropdown';
 import BackButton from '../components/BackButton';
 import Background from '../components/Background';
 import Header from '../components/Header';
+import Paragraph from '../components/Paragraph';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import Button from '../components/Button';
@@ -43,19 +44,24 @@ const requiredFields = [
   {
     name: 'zipCode',
     label: 'Zip code',
-    value: '',
+    autoCompleteType: 'postal-code',
+    textContentType: 'postalCode'
   },
   {
     name: 'streetAddress',
     label: 'Street address',
+    autoCompleteType: 'street-address',
+    textContentType: 'fullStreetAddress'
   },
   {
     name: 'city',
     label: 'City',
+    textContentType: 'addressCity'
   },
   {
     name: 'state',
     label: 'State',
+    textContentType: 'addressState'
   }
 ];
 const successMessage = 'Transaction has been successfully authorized.';
@@ -256,7 +262,7 @@ const TransactionScreen = ({ route, navigation }) => {
       
       <Modal visible={modalVisible && fields.length > 0} dismissable={false} contentContainerStyle={styles.modalContainer}>
         <Header>Update Profile</Header>
-      
+        <Paragraph>You need to fill the following fields to proceed</Paragraph>
         <View>
           {
             fields.map(item => (
@@ -268,6 +274,8 @@ const TransactionScreen = ({ route, navigation }) => {
                 onChangeText={text => changeModalValues(item.name, text)}
                 error={!!modalValues[item.name].error}
                 errorText={modalValues[item.name].error}
+                autoCompleteType={item.autoCompleteType ? item.autoCompleteType : 'off'}
+                textContentType={item.textContentType}
               />
             ))
           }

@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 26,
     color: theme.colors.secondary,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 14,
   },
 });
