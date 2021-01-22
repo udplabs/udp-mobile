@@ -165,7 +165,7 @@ const LoginScreen = ({ navigation }) => {
     //signIn();
     const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
     console.log('uri---', uri);
-    navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito: false});
+    navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(state, access_token), incognito: false});
   }
 
   const _onTouchIDPressed = async () => {
@@ -209,19 +209,21 @@ const LoginScreen = ({ navigation }) => {
     }
   }
 
-  onSignInSuccess = async(access_token) => {
-    await AsyncStorage.setItem('@accessToken', access_token);
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'Profile',
-            params: { incognito: false }
-          },
-        ],
-      })
-    );
+  onSignInSuccess = async(state, access_token) => {
+    if(state) {
+      await AsyncStorage.setItem('@accessToken', access_token);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Profile',
+              params: { incognito: false }
+            },
+          ],
+        })
+      );
+    }
   }
   /*
   useEffect(() => {

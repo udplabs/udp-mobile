@@ -38,26 +38,24 @@ export class ProfileScreen extends React.Component {
   }
 
   async componentDidMount() {
-    const { navigation, route } = this.props;
-    const incognito = route.params && route.params.incognito;
-    
+    const { navigation } = this.props;
+
     const accessToken = await AsyncStorage.getItem('@accessToken');
     if(accessToken) {
-      this.setState({ accessToken }, () => {
-        this.loadProfile();
-        navigation.addListener('focus', this.loadProfile);
+      this.setState({ accessToken }, async () => {
+        await this.loadProfile();
       });
     } else {
       const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(access_token), incognito: false });
+      navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(state, access_token), incognito: false });
     }
   }
 
   loadProfile = async () => {
-    console.log('loadprofile--', this.loadProfile);
+    console.log('loadprofile-----');
     const { accessToken } = this.state;
     if(accessToken) {
-      this.setState({ progress: true });
+
       let userId = await AsyncStorage.getItem('@userId');
       if(userId) {
         this.setState({ userId });
@@ -73,6 +71,7 @@ export class ProfileScreen extends React.Component {
       if(userArray.indexOf(userId) < 0)  {
         this.showTerms();
       } else {
+        this.setState({ progress: true });
         axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -103,8 +102,10 @@ export class ProfileScreen extends React.Component {
     }
   }
 
-  onSignInSuccess = async(access_token) => {
-    await AsyncStorage.setItem('@accessToken', access_token);
+  onSignInSuccess = async(state, access_token) => {
+    if(state) {
+      await AsyncStorage.setItem('@accessToken', access_token);
+    }
   }
 
   transactionalMFA = async () => {
@@ -115,6 +116,7 @@ export class ProfileScreen extends React.Component {
   }
 
   showTerms = () => {
+    const { navigation } = this.props;
     Alert.alert(
       'Terms and Conditions',
       termsText,
@@ -126,6 +128,7 @@ export class ProfileScreen extends React.Component {
             const userArray = JSON.parse(acceptedUsers) || [];
             userArray.push(userId);
             await AsyncStorage.setItem('@acceptedUsers', JSON.stringify(userArray));
+            navigation.addListener('focus', this.loadProfile);
             this.loadProfile();
           }
 
