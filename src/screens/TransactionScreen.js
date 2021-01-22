@@ -307,6 +307,9 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     flexDirection: 'column',
     width: '100%',
+    paddingTop: 60,
+    paddingBottom: 30,
+    alignItems: 'center',
   },
   inputContainer: {
     alignItems: 'center',

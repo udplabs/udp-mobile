@@ -194,7 +194,7 @@ export class ProfileScreen extends React.Component {
             />
             <Error error={error} />
             { user && (
-              <View style={{ paddingTop: 20, alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+              <View style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}>
                 <Text style={styles.titleHello}>Welcome {user.firstName}</Text>
                 <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
                 <Text style={styles.titleDetails}>Email: {user.email}</Text>
@@ -236,7 +236,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-between'
   },
   logoutButton: {
     paddingLeft: 10,
@@ -248,6 +247,8 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     flexDirection: 'column',
     width: '100%',
+    paddingTop: 60,
+    paddingBottom: 30,
   },
   titleHello: {
     fontSize: 20,

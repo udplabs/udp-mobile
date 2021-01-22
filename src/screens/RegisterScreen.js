@@ -38,7 +38,7 @@ const RegisterScreen = ({ navigation }) => {
         setTimeout(() => {
           captchaForm.hide();
           const url = `${configFile.customUrl}/proxy/udp-mobile/users?activate=true`;
-          console.log('url---', url);
+
           axios.post(url, {
             profile: {
               firstName: firstName.value,
@@ -195,7 +195,7 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   inputContainer: {
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingVertical: 30,
   },
   label: {
     color: theme.colors.secondary,

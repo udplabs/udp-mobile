@@ -7,8 +7,9 @@ import {
 } from '@okta/okta-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
-import jwt from 'jwt-lite';
+
 import axios from 'axios';
+
 import Logo from '../components/Logo';
 import Background from '../components/Background';
 import Header from '../components/Header';
@@ -347,7 +348,7 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   inputContainer: {
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingVertical: 30,
   },
   forgotPassword: {
     width: '100%',

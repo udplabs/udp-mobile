@@ -17,7 +17,7 @@ const IDVerification = ({ route, navigation }) => {
     if(state.url.indexOf('?#/done') >= 0) {
       await AsyncStorage.setItem('@uploadedID', id);
       route.params.onGoBack();
-      await navigation.goBack(null);
+      await navigation.goBack();
     }
   }
 
@@ -32,7 +32,7 @@ const IDVerification = ({ route, navigation }) => {
       backgroundColor: 'white',
     }}>
       <Button
-        onPress={() => navigation.goBack(null)}
+        onPress={() => navigation.goBack()}
         style={{
           flexDirection: 'row',
           justifyContent: 'flex-end',

@@ -253,157 +253,159 @@ const EditProfileScreen = ({ route, navigation }) => {
 
   return <Background>
     <BackButton goBack={() => navigation.goBack()} />
-    <View style={styles.container}>
-      <Spinner
-        visible={loading}
-        textContent={'Loading...'}
-        textStyle={styles.spinnerTextStyle}
-      />
-      <Header>Edit Profile</Header>
-      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
-      { page === 0 && (
+    <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        <Spinner
+          visible={loading}
+          textContent={'Loading...'}
+          textStyle={styles.spinnerTextStyle}
+        />
+        
+        <Header>Edit Profile</Header>
+        { page === 0 && (
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="First Name"
+              returnKeyType="next"
+              value={firstName.value}
+              onChangeText={text => setFirstName({ value: text, error: '' })}
+              error={!!firstName.error}
+              errorText={firstName.error}
+            />
+
+            <TextInput
+              label="Last Name"
+              returnKeyType="next"
+              value={lastName.value}
+              onChangeText={text => setLastName({ value: text, error: '' })}
+              error={!!lastName.error}
+              errorText={lastName.error}
+            />
+
+            <TextInput
+              label="Email"
+              returnKeyType="next"
+              value={email.value}
+              onChangeText={text => setEmail({ value: text, error: '' })}
+              error={!!email.error}
+              errorText={email.error}
+              autoCapitalize="none"
+              autoCompleteType="email"
+              textContentType="emailAddress"
+              keyboardType="email-address"
+            />
+
+            <TextInput
+              keyboardType="numeric"
+              returnKeyType="next"
+              placeholder='Enter mobile number'
+              label="Mobile number"
+              value={phoneNumber.value}
+              error={!!phoneNumber.error}
+              errorText={phoneNumber.error}
+              onChangeText={(value) => {
+                let num = value.replace(".", '');
+                if(isNaN(num)){
+                    // Its not a number
+                }else{
+                    setPhoneNumber({ value: num, error: ''})}  
+                }
+              }
+            />
+
+            <Button mode="contained" onPress={_onSave} style={styles.button}>
+              Save and Continue
+            </Button>
+          </View>
+        )
+      }
+      {
+        page === 1 && (
         <View style={styles.inputContainer}>
           <TextInput
-            label="First Name"
+            label="Zip code"
             returnKeyType="next"
-            value={firstName.value}
-            onChangeText={text => setFirstName({ value: text, error: '' })}
-            error={!!firstName.error}
-            errorText={firstName.error}
-          />
-
-          <TextInput
-            label="Last Name"
-            returnKeyType="next"
-            value={lastName.value}
-            onChangeText={text => setLastName({ value: text, error: '' })}
-            error={!!lastName.error}
-            errorText={lastName.error}
-          />
-
-          <TextInput
-            label="Email"
-            returnKeyType="next"
-            value={email.value}
-            onChangeText={text => setEmail({ value: text, error: '' })}
-            error={!!email.error}
-            errorText={email.error}
+            value={zipCode.value}
+            onChangeText={text => setZipCode({ value: text, error: '' })}
+            error={!!zipCode.error}
+            errorText={zipCode.error}
             autoCapitalize="none"
-            autoCompleteType="email"
-            textContentType="emailAddress"
-            keyboardType="email-address"
+            autoCompleteType="postal-code"
+            textContentType="postalCode"
+          />
+          <TextInput
+            label="Street address"
+            returnKeyType="next"
+            value={streetAddress.value}
+            onChangeText={text => setStreetAddress({ value: text, error: '' })}
+            error={!!streetAddress.error}
+            errorText={streetAddress.error}
+            autoCompleteType="street-address"
+            textContentType="fullStreetAddress"
+          />
+          <TextInput
+            label="City"
+            returnKeyType="next"
+            value={city.value}
+            onChangeText={text => setCity({ value: text, error: '' })}
+            error={!!city.error}
+            errorText={city.error}
+            textContentType="addressCity"
+          />
+          <TextInput
+            label="State"
+            returnKeyType="next"
+            value={state.value}
+            onChangeText={text => setState({ value: text, error: '' })}
+            error={!!state.error}
+            errorText={state.error}
+            textContentType="addressState"
+          />
+          <TextInput
+            label="Password"
+            placeholder="Password"
+            returnKeyType="next"
+            value={password.value}
+            onChangeText={text => setPassword({ value: text, error: '' })}
+            error={!!password.error}
+            errorText={password.error}
+            secureTextEntry
           />
 
           <TextInput
-            keyboardType="numeric"
-            returnKeyType="next"
-            placeholder='Enter mobile number'
-            label="Mobile number"
-            value={phoneNumber.value}
-            error={!!phoneNumber.error}
-            errorText={phoneNumber.error}
-            onChangeText={(value) => {
-              let num = value.replace(".", '');
-              if(isNaN(num)){
-                  // Its not a number
-              }else{
-                  setPhoneNumber({ value: num, error: ''})}  
-              }
-            }
+            label="Confirm Password"
+            placeholder="Confirm Password"
+            returnKeyType="done"
+            value={confirmPassword.value}
+            onChangeText={text => setConfirmPassword({ value: text, error: '' })}
+            error={!!confirmPassword.error}
+            errorText={confirmPassword.error}
+            secureTextEntry
           />
-
-          <Button mode="contained" onPress={_onSave} style={styles.button}>
-            Save and Continue
-          </Button>
+          <View style={styles.buttonRow}>
+            <Button mode="contained" onPress={_onSave} style={styles.button}>
+              Save
+            </Button>
+            <Button mode="contained" onPress={_onGoBack} style={styles.button}>
+              Go Back
+            </Button>
+          </View>
         </View>
-      )
-    }
-    {
-      page === 1 && (
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="Zip code"
-          returnKeyType="next"
-          value={zipCode.value}
-          onChangeText={text => setZipCode({ value: text, error: '' })}
-          error={!!zipCode.error}
-          errorText={zipCode.error}
-          autoCapitalize="none"
-          autoCompleteType="postal-code"
-          textContentType="postalCode"
-        />
-        <TextInput
-          label="Street address"
-          returnKeyType="next"
-          value={streetAddress.value}
-          onChangeText={text => setStreetAddress({ value: text, error: '' })}
-          error={!!streetAddress.error}
-          errorText={streetAddress.error}
-          autoCompleteType="street-address"
-          textContentType="fullStreetAddress"
-        />
-        <TextInput
-          label="City"
-          returnKeyType="next"
-          value={city.value}
-          onChangeText={text => setCity({ value: text, error: '' })}
-          error={!!city.error}
-          errorText={city.error}
-          textContentType="addressCity"
-        />
-        <TextInput
-          label="State"
-          returnKeyType="next"
-          value={state.value}
-          onChangeText={text => setState({ value: text, error: '' })}
-          error={!!state.error}
-          errorText={state.error}
-          textContentType="addressState"
-        />
-        <TextInput
-          label="Password"
-          placeholder="Password"
-          returnKeyType="next"
-          value={password.value}
-          onChangeText={text => setPassword({ value: text, error: '' })}
-          error={!!password.error}
-          errorText={password.error}
-          secureTextEntry
-        />
-
-        <TextInput
-          label="Confirm Password"
-          placeholder="Confirm Password"
-          returnKeyType="done"
-          value={confirmPassword.value}
-          onChangeText={text => setConfirmPassword({ value: text, error: '' })}
-          error={!!confirmPassword.error}
-          errorText={confirmPassword.error}
-          secureTextEntry
-        />
-        <View style={styles.buttonRow}>
-          <Button mode="contained" onPress={_onSave} style={styles.button}>
-            Save
-          </Button>
-          <Button mode="contained" onPress={_onGoBack} style={styles.button}>
-            Go Back
-          </Button>
-        </View>
-      </View>
-    )}
-    {
-      !!idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
-    }
-    <Button onPress={uploadID} mode="outlined">
-      Upload a new ID
-    </Button>
-    {
-      idStatus === 'Pending' && <Button onPress={verifyId} mode="outlined">
-        Check Status
+      )}
+      {
+        !!idStatus && <Text style={styles.verified}>{`ID Status: ${idStatus}`}</Text>
+      }
+      <Button onPress={uploadID} mode="outlined">
+        Upload a new ID
       </Button>
-    }
+      {
+        idStatus === 'Pending' && <Button onPress={verifyId} mode="outlined">
+          Check Status
+        </Button>
+      }
+      </View>
      </ScrollView>
-    </View>
+   
    
   </Background>
 };
@@ -414,11 +416,14 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     flexDirection: 'column',
     width: '100%',
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: 30,
   },
   inputContainer: {
     alignItems: 'center',
-    paddingBottom: 20,
     width: '100%',
+    paddingBottom: 20,
   },
   headerRow: {
     flexDirection: 'row',

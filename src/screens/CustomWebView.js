@@ -11,7 +11,7 @@ const CustomWebView = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { uri, onGoBack, incognito } = route.params;
 
-  onLoad = async(state) => {
+  onLoad = (state) => {
     console.log('state-----', state.url);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
@@ -21,11 +21,11 @@ const CustomWebView = ({ route, navigation }) => {
       }
       const { access_token } = params;
       onGoBack(true, access_token);
-      
-      await navigation.goBack(null);
+      navigation.goBack();
+
     } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
       onGoBack(false);
-      await navigation.goBack(null);
+      navigation.goBack();
     }
   }
 
@@ -40,7 +40,7 @@ const CustomWebView = ({ route, navigation }) => {
       backgroundColor: 'white',
     }}>
       <Button
-        onPress={() => navigation.goBack(null)}
+        onPress={() => navigation.goBack()}
         style={{
           flexDirection: 'row',
           justifyContent: 'flex-end',
