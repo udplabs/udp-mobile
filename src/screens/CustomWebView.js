@@ -3,15 +3,16 @@ import { View, Dimensions, ActivityIndicator } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { createStackNavigator } from '@react-navigation/stack';
 import Button from '../components/Button';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const CustomWebView = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const { uri, onGoBack, incognito } = route.params;
+  const { uri, onGoBack, login } = route.params;
 
-  onLoad = (state) => {
+  onNavigationStateChange = async (state) => {
     console.log('state-----', state.url);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
@@ -20,12 +21,14 @@ const CustomWebView = ({ route, navigation }) => {
         params[match[1]] = match[2]
       }
       const { access_token } = params;
-      onGoBack(true, access_token);
-      navigation.goBack();
-
+      if(login) {
+        await AsyncStorage.setItem('@accessToken', access_token);
+      }
+      onGoBack(true);
+      await navigation.goBack(null);
     } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
-      onGoBack(false);
-      navigation.goBack();
+      await AsyncStorage.removeItem('@accessToken');
+      await navigation.goBack(null);
     }
   }
 
@@ -54,8 +57,7 @@ const CustomWebView = ({ route, navigation }) => {
       <WebView
         onLoad={() => setIsLoading(false)}
         source={{ uri }}
-        onNavigationStateChange={onLoad}
-        incognito={incognito}
+        onNavigationStateChange={onNavigationStateChange}
       />
     
     </View>
@@ -64,14 +66,14 @@ const CustomWebView = ({ route, navigation }) => {
 
 const Stack = createStackNavigator();
 
-export default function WebViewStack({ route, navigation }) {
-  const { uri, onGoBack, incognito } = route.params;
+export default function WebViewStack({ route }) {
+  const { uri, onGoBack, login } = route.params;
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }}}
       mode="modal"
     >
-      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, onGoBack, incognito }} />
+      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, onGoBack, login }} />
     </Stack.Navigator>
   )
 }

@@ -163,10 +163,8 @@ const LoginScreen = ({ navigation }) => {
   };
   
   _onWebLoginPressed = () => {
-    //signIn();
     const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-    console.log('uri---', uri);
-    navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(state, access_token), incognito: false});
+    navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
   }
 
   const _onTouchIDPressed = async () => {
@@ -210,16 +208,14 @@ const LoginScreen = ({ navigation }) => {
     }
   }
 
-  onSignInSuccess = async(state, access_token) => {
+  onSignInSuccess = async(state) => {
     if(state) {
-      await AsyncStorage.setItem('@accessToken', access_token);
-      navigation.dispatch(
+      await navigation.dispatch(
         CommonActions.reset({
           index: 0,
           routes: [
             {
               name: 'Profile',
-              params: { incognito: false }
             },
           ],
         })

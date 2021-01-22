@@ -33,7 +33,7 @@ export class ProfileScreen extends React.Component {
       progress: false,
       error: '',
       userId: null,
-
+      loading: 0,
     };
   }
 
@@ -43,68 +43,75 @@ export class ProfileScreen extends React.Component {
     const accessToken = await AsyncStorage.getItem('@accessToken');
     if(accessToken) {
       this.setState({ accessToken }, async () => {
-        await this.loadProfile();
+        let userId = await AsyncStorage.getItem('@userId');
+        if(!userId) {
+          const result =  jwt.decode(accessToken).claimsSet;
+          userId = result.uid;
+        }
+        this.setState({ userId }, async () => {
+          // Checking if the user accepted the permission
+          const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
+          const userArray = JSON.parse(acceptedUsers) || [];
+          if(userArray.indexOf(userId) < 0)  {
+            Alert.alert(
+              'Terms and Conditions',
+              termsText,
+              [
+                { text: 'Agree', onPress: async () => {
+                  userArray.push(userId);
+                  await AsyncStorage.setItem('@acceptedUsers', JSON.stringify(userArray));
+                  await this.loadProfile();
+                  navigation.addListener('focus', this.loadProfile);
+                } },
+                { text: 'Disagree', onPress: () => this.logout(), style: 'cancel'}
+              ],
+              { cancelable: false }
+            );
+          } else {
+            
+            await this.loadProfile();
+            navigation.addListener('focus', this.loadProfile);
+          }
+        });
       });
     } else {
-      const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (state, access_token) => onSignInSuccess(state, access_token), incognito: false });
+      const sessionToken = await AsyncStorage.getItem('@sessionToken');
+      const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&&sessionToken=${sessionToken}`;
+      navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
     }
   }
 
   loadProfile = async () => {
     console.log('loadprofile-----');
-    const { accessToken } = this.state;
+    const { accessToken, userId } = this.state;
     if(accessToken) {
-
-      let userId = await AsyncStorage.getItem('@userId');
-      if(userId) {
-        this.setState({ userId });
-      } else {
-        const result =  jwt.decode(accessToken).claimsSet;
-        userId = result.uid;
-        this.setState({ userId });
+      this.setState({ progress: true });
+      axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }}
+      )
+      .then(response => {
+        const { data } = response;
+        this.setState({ progress: false, user: data.profile });
       }
+      ,(e) => {
 
-      // Checking if the user accepted the permission
-      const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
-      const userArray = JSON.parse(acceptedUsers) || [];
-      if(userArray.indexOf(userId) < 0)  {
-        this.showTerms();
-      } else {
-        this.setState({ progress: true });
-        axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }}
-        )
-        .then(response => {
-          const { data } = response;
-          this.setState({ progress: false, user: data.profile });
+        if(e.response && e.response.data && e.response.data.message === 'Unauthorized') {
+          Alert.alert(
+            'Error',
+            'Session has expired. Please try to login again',
+            [
+              { text: 'OK', onPress: async () => {
+                this.logout();
+              }
+              }
+            ]
+          );
+        } else {
+          this.setState({ progress: false, error: e.message });
         }
-        ,(e) => {
-
-          if(e.response && e.response.data && e.response.data.message === 'Unauthorized') {
-            Alert.alert(
-              'Error',
-              'Session has expired. Please try to login again',
-              [
-                { text: 'OK', onPress: async () => {
-                  this.logout();
-                }
-                }
-              ]
-            );
-          } else {
-            this.setState({ progress: false, error: e.message });
-          }
-        })
-      }
-    }
-  }
-
-  onSignInSuccess = async(state, access_token) => {
-    if(state) {
-      await AsyncStorage.setItem('@accessToken', access_token);
+      })
     }
   }
 
@@ -113,30 +120,6 @@ export class ProfileScreen extends React.Component {
     const { accessToken, user, userId } = this.state;
 
     navigation.navigate('Transaction', { accessToken, user, userId });
-  }
-
-  showTerms = () => {
-    const { navigation } = this.props;
-    Alert.alert(
-      'Terms and Conditions',
-      termsText,
-      [
-        { text: 'Agree', onPress: async () => {
-          const { userId } = this.state;
-          if(userId) {
-            const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
-            const userArray = JSON.parse(acceptedUsers) || [];
-            userArray.push(userId);
-            await AsyncStorage.setItem('@acceptedUsers', JSON.stringify(userArray));
-            navigation.addListener('focus', this.loadProfile);
-            this.loadProfile();
-          }
-
-        } },
-        { text: 'Disagree', onPress: () => this.logout(), style: 'cancel'}
-      ],
-      { cancelable: false }
-    );
   }
 
   logout = async () => {

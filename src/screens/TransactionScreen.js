@@ -73,8 +73,7 @@ const TransactionScreen = ({ route, navigation }) => {
   const [toAccount, setToAccount] = useState(null);
   const [showFromDropDown, setShowFromDropDown] = useState(false);
   const [showToDropDown, setShowToDropDown] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [amountError, setAmountError] = useState(null);
+  const [amount, setAmount] = useState({ value: '', error: ''});
   const [fields, setFields] = useState([]);
   const [modalVisible, setModalVisible] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -112,17 +111,17 @@ const TransactionScreen = ({ route, navigation }) => {
   }, [route.params]);
 
   onPayment = () => {
-    if(!amount || amount <= 0) {
-      setAmountError('You have to specify the amount');
+    if(!amount.value || parseFloat(amount.value) <= 0) {
+      setAmount({ ...amount, error: 'You have to specify the amount'});
     } else {
-      setAmountError(null);
       const uri = `${configFile.authUri}?client_id=${configFile.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status), incognito: false }, );
+      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status), login: false }, );
     }
   }
 
   displayBanner = (status) => {
-    setMessage(status ? successMessage : 'An error has occured.');
+    setLoading(false);
+    setMessage(status ? successMessage : 'An error has occured.')
     setBannerVisible(true);
   }
 
@@ -244,10 +243,10 @@ const TransactionScreen = ({ route, navigation }) => {
               <View style={styles.row}>
                 <TextInput
                   label="Amount to Transfer"
-                  value={amount}
-                  onChangeText={amount => setAmount(amount)}
-                  error={!!amountError}
-                  errorText={amountError}
+                  value={amount.value}
+                  onChangeText={amount => setAmount({value: amount, error: ''})}
+                  error={!!amount.error}
+                  errorText={amount.error}
                   keyboardType="numeric"
                 />
               </View>
