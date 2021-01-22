@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import jwt from 'jwt-lite';
-
+import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -21,7 +21,7 @@ import Error from '../components/Error';
 import configFile from '../../samples.config';
 
 const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-
+const useWebKit = true;
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
@@ -146,22 +146,26 @@ export class ProfileScreen extends React.Component {
       //this.setState({ error: e.message })
     })
     .finally(e => {
-      AsyncStorage.getAllKeys()
-        .then(keys => {
-          if(keys.indexOf('@acceptedUsers') > -1) {
-            keys.splice(keys.indexOf('@acceptedUsers'), 1);
-          }
-          AsyncStorage.multiRemove(keys);
-        })
-        .then(() => {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [
-                { name: 'Home' },
-              ],
-            })
-          );
+      CookieManager.clearAll(useWebKit)
+        .then((success) => {
+          console.log('CookieManager.clearAll =>', success);
+          AsyncStorage.getAllKeys()
+          .then(keys => {
+            if(keys.indexOf('@acceptedUsers') > -1) {
+              keys.splice(keys.indexOf('@acceptedUsers'), 1);
+            }
+            AsyncStorage.multiRemove(keys);
+          })
+          .then(() => {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  { name: 'Home' },
+                ],
+              })
+            );
+          });
         });
     });
   }

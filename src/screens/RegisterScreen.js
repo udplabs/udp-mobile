@@ -37,8 +37,9 @@ const RegisterScreen = ({ navigation }) => {
         console.log('Verified code from Google', event.nativeEvent.data);
         setTimeout(() => {
           captchaForm.hide();
-          
-          axios.post(`${configFile.baseUri}/users?activate=true`, {
+          const url = `${configFile.customUrl}/proxy/udp-mobile/users?activate=true`;
+          console.log('url---', url);
+          axios.post(url, {
             profile: {
               firstName: firstName.value,
               lastName: lastName.value,
@@ -51,7 +52,12 @@ const RegisterScreen = ({ navigation }) => {
                 value: password.value,
               }
             }
-          })
+          }, {
+            headers: {
+              Authorization: 'Bearer zt100'
+            }
+          }
+          )
           .then(response => {
             Alert.alert(
               'Signup',
@@ -63,6 +69,7 @@ const RegisterScreen = ({ navigation }) => {
             );
           }
           ,(error) => {
+
             Alert.alert(
               'Error',
               'An error has occured, please try again.',

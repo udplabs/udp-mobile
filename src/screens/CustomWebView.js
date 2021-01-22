@@ -22,7 +22,6 @@ const CustomWebView = ({ route, navigation }) => {
       const { access_token } = params;
       onGoBack(true, access_token);
       
-      
       await navigation.goBack(null);
     } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
       onGoBack(false);

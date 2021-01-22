@@ -1,6 +1,5 @@
-
 import React, { memo, useState } from 'react';
-import { View, Dimensions } from 'react-native'
+import { View, Dimensions, ActivityIndicator } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { createStackNavigator } from '@react-navigation/stack';
 import { CommonActions } from '@react-navigation/native';
@@ -12,6 +11,7 @@ const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const SocialLoginModal = ({ route, navigation }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const { mode } = route.params;
   let idp = '0oavyrdmiygFJn4GX0h7';
   if (mode === 'google') {
@@ -65,10 +65,13 @@ const SocialLoginModal = ({ route, navigation }) => {
       >
         Close
       </Button>
+      {
+        isLoading && <ActivityIndicator size="large" />
+      }
       <WebView
+        onLoad={() => setIsLoading(false)}
         source={{ uri }}
         onNavigationStateChange={onLoad}
-        incognito={true}
       />
     </View>
   );
