@@ -81,6 +81,21 @@ export class ProfileScreen extends React.Component {
     }
   }
 
+  onSignInSuccess = async (state) => {
+    if(state) {
+      await this.loadProfile();
+    } else {
+      Alert.alert(
+        'Error',
+        'An error has occured, please try again later.',
+        [
+          { text: 'OK', onPress: () => this.logout() }
+        ],
+        { cancelable: false }
+      );
+    }
+  }
+
   loadProfile = async () => {
     console.log('loadprofile-----');
     const { accessToken, userId } = this.state;

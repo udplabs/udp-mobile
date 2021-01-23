@@ -120,9 +120,27 @@ const TransactionScreen = ({ route, navigation }) => {
   }
 
   displayBanner = (status) => {
-    setLoading(false);
-    setMessage(status ? successMessage : 'An error has occured.')
-    setBannerVisible(true);
+    // setMessage(status ? successMessage : 'An error has occured.')
+    // setBannerVisible(true);
+    if(status) {
+      Alert.alert(
+        'Success',
+        successMessage,
+        [
+          { text: 'OK', onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    } else {
+      Alert.alert(
+        'Failure',
+        'An error has occured.',
+        [
+          { text: 'OK', onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    }
   }
 
   changeModalValues = (name, text) => {

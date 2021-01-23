@@ -7,7 +7,7 @@ import {
 } from '@okta/okta-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
-
+import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
 import Logo from '../components/Logo';
@@ -26,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [context, setContext] = useState(null);
   const [fingerprint, setFingerprint] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const _onLoginPressed = () => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
@@ -36,7 +36,7 @@ const LoginScreen = ({ navigation }) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
-
+    setLoading(true);
     axios.post(`${configFile.baseUri}/authn`, {
       username: email.value,
       password: password.value
@@ -50,7 +50,7 @@ const LoginScreen = ({ navigation }) => {
       .then(async response => {
         const { data: { _embedded, status } } = response;
         const userId = _embedded.user.id;
-
+        
         if(status === 'MFA_REQUIRED') {
           const { stateToken } =  response.data;
           const factorId = _embedded.factors[0].id;
@@ -66,7 +66,7 @@ const LoginScreen = ({ navigation }) => {
                   [
                     {
                       text: "Cancel",
-                      onPress: () => console.log("Cancel Pressed"),
+                      onPress: () => setLoading(false),
                       style: "cancel"
                     },
                     {
@@ -80,23 +80,26 @@ const LoginScreen = ({ navigation }) => {
                             const { status, sessionToken } = activateResponse.data;
                            
                             if(status === 'SUCCESS') {
+                              
                               await AsyncStorage.setItem('@userId', userId);
                               await AsyncStorage.setItem('@sessionToken', sessionToken);
                               await AsyncStorage.removeItem('@accessToken');
-                              
-                              navigation.dispatch(
-                                CommonActions.reset({
-                                  index: 0,
-                                  routes: [
-                                    { name: 'Profile',
-                                      params: { incognito: true }
-                                    },
-                                  ],
-                                })
-                              );
+                              setLoading(false);
+                              // navigation.dispatch(
+                              //   CommonActions.reset({
+                              //     index: 0,
+                              //     routes: [
+                              //       { name: 'Profile',
+                              //         params: { incognito: true }
+                              //       },
+                              //     ],
+                              //   })
+                              // );
+                              navigation.navigate('Profile');
                             }
                           })
                           .catch(activateError => {
+                            setLoading(false);
                             const { data } = activateError.response;
                             console.log('----activateError', data);
                             const errorMsg = data.errorCauses && data.errorCauses.length > 0 && data.errorCauses[0].errorSummary ? data.errorCauses[0].errorSummary : 'An error has occured, please try again.';
@@ -105,7 +108,7 @@ const LoginScreen = ({ navigation }) => {
                               'Error',
                               errorMsg,
                               [
-                                { text: 'OK', onPress: () => console.log('error', errorMsg) }
+                                { text: 'OK', onPress: () => setLoading(false) }
                               ],
                               { cancelable: false }
                             );
@@ -117,6 +120,7 @@ const LoginScreen = ({ navigation }) => {
               }
             })
             .catch(verifyError => {
+              setLoading(false);
               const { data } = verifyError.response;
               console.log('---verifyError', data);
               const errorMsg = data.errorCauses && data.errorCauses.length > 0 && data.errorCauses[0].errorSummary ? data.errorCauses[0].errorSummary : 'An error has occured, please try again.';
@@ -125,26 +129,28 @@ const LoginScreen = ({ navigation }) => {
                 'Error',
                 errorMsg,
                 [
-                  { text: 'OK', onPress: () => console.log('error', errorMsg) }
+                  { text: 'OK', onPress: () => setLoading(false) }
                 ],
                 { cancelable: false }
               );
             })   
         } else if(status === 'SUCCESS') {
+          setLoading(false);
           const { sessionToken } = response.data;
           await AsyncStorage.setItem('@userId', userId);
           await AsyncStorage.setItem('@sessionToken', sessionToken);
           await AsyncStorage.removeItem('@accessToken');
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [
-                { name: 'Profile',
-                  params: { incognito: true }
-                },
-              ],
-            })
-          );
+          // navigation.dispatch(
+          //   CommonActions.reset({
+          //     index: 0,
+          //     routes: [
+          //       { name: 'Profile',
+          //         params: { incognito: true }
+          //       },
+          //     ],
+          //   })
+          // );
+          navigation.navigate('Profile');
         }
       }
       ,(error) => {
@@ -155,7 +161,7 @@ const LoginScreen = ({ navigation }) => {
           'Error',
           errorMsg,
           [
-            { text: 'OK', onPress: () => console.log('error', errorMsg) }
+            { text: 'OK', onPress: () => setLoading(false) }
           ],
           { cancelable: false }
         );
@@ -208,9 +214,9 @@ const LoginScreen = ({ navigation }) => {
     }
   }
 
-  onSignInSuccess = async(state) => {
+  onSignInSuccess = (state) => {
     if(state) {
-      await navigation.dispatch(
+      navigation.dispatch(
         CommonActions.reset({
           index: 0,
           routes: [
@@ -283,6 +289,11 @@ const LoginScreen = ({ navigation }) => {
       <BackButton goBack={() => navigation.navigate('Home')} />
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
         <View style={styles.inputContainer}>
+            <Spinner
+              visible={loading}
+              textContent={'Loading...'}
+              textStyle={styles.spinnerTextStyle}
+            />
           <Logo />
           <Header>Welcome back</Header>
 
@@ -361,6 +372,9 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: 'bold',
     color: theme.colors.primary,
+  },
+  spinnerTextStyle: {
+    color: '#FFF',
   },
 });
 
