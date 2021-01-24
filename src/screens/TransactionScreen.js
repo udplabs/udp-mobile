@@ -122,6 +122,7 @@ const TransactionScreen = ({ route, navigation }) => {
   displayBanner = (status) => {
     // setMessage(status ? successMessage : 'An error has occured.')
     // setBannerVisible(true);
+    console.log('banner---')
     if(status) {
       Alert.alert(
         'Success',

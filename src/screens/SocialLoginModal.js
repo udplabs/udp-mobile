@@ -20,9 +20,9 @@ const SocialLoginModal = ({ route, navigation }) => {
     idp = '0oaw729qicIxZkUtN0h7';
   }
   const uri = `${configFile.authUri}?idp=${idp}&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
-  console.log('uri----', uri);
+  
   onLoad = async(state) => {
-    console.log('state----', state.url);
+    setIsLoading(false);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
       let params = {};
@@ -35,14 +35,14 @@ const SocialLoginModal = ({ route, navigation }) => {
       await AsyncStorage.removeItem('@userId');
       await AsyncStorage.setItem('@accessToken', access_token);
       await navigation.goBack(null);
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            { name: 'Profile' },
-          ],
-        })
-      );
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Profile',
+          },
+        ],
+      })
     }
   }
 
@@ -69,9 +69,8 @@ const SocialLoginModal = ({ route, navigation }) => {
         isLoading && <ActivityIndicator size="large" />
       }
       <WebView
-        onLoad={() => setIsLoading(false)}
+        onLoadStart={(event) => onLoad(event.nativeEvent)}
         source={{ uri }}
-        onNavigationStateChange={onLoad}
       />
     </View>
   );

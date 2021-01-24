@@ -12,8 +12,8 @@ const CustomWebView = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { uri, onGoBack, login } = route.params;
 
-  onNavigationStateChange = async (state) => {
-    console.log('state-----', state.url);
+  navigationChange = async (state) => {
+    setIsLoading(false);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;
       let params = {};
@@ -25,10 +25,10 @@ const CustomWebView = ({ route, navigation }) => {
         await AsyncStorage.setItem('@accessToken', access_token);
       }
       onGoBack(true);
-      await navigation.goBack(null);
+      navigation.goBack();
     } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
       await AsyncStorage.removeItem('@accessToken');
-      await navigation.goBack(null);
+      navigation.goBack();
     }
   }
 
@@ -55,9 +55,8 @@ const CustomWebView = ({ route, navigation }) => {
         isLoading && <ActivityIndicator size="large" />
       }
       <WebView
-        onLoad={() => setIsLoading(false)}
+        onLoadStart={(event) => navigationChange(event.nativeEvent)}
         source={{ uri }}
-        onNavigationStateChange={onNavigationStateChange}
       />
     
     </View>

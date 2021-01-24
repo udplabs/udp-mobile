@@ -38,6 +38,7 @@ export class ProfileScreen extends React.Component {
   }
 
   async componentDidMount() {
+    console.log('profile---');
     const { navigation } = this.props;
 
     const accessToken = await AsyncStorage.getItem('@accessToken');
@@ -77,11 +78,13 @@ export class ProfileScreen extends React.Component {
     } else {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
       const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&&sessionToken=${sessionToken}`;
+      console.log('loading webview from profile');
       navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
     }
   }
 
   onSignInSuccess = async (state) => {
+    console.log('siginsuccess profile--', state);
     if(state) {
       await this.loadProfile();
     } else {
@@ -158,14 +161,14 @@ export class ProfileScreen extends React.Component {
             AsyncStorage.multiRemove(keys);
           })
           .then(() => {
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [
-                  { name: 'Home' },
-                ],
-              })
-            );
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Home',
+                },
+              ],
+            })
           });
         });
     });

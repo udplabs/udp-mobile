@@ -85,17 +85,14 @@ const LoginScreen = ({ navigation }) => {
                               await AsyncStorage.setItem('@sessionToken', sessionToken);
                               await AsyncStorage.removeItem('@accessToken');
                               setLoading(false);
-                              // navigation.dispatch(
-                              //   CommonActions.reset({
-                              //     index: 0,
-                              //     routes: [
-                              //       { name: 'Profile',
-                              //         params: { incognito: true }
-                              //       },
-                              //     ],
-                              //   })
-                              // );
-                              navigation.navigate('Profile');
+                              navigation.reset({
+                                index: 0,
+                                routes: [
+                                  {
+                                    name: 'Profile',
+                                  },
+                                ],
+                              })
                             }
                           })
                           .catch(activateError => {
@@ -140,17 +137,14 @@ const LoginScreen = ({ navigation }) => {
           await AsyncStorage.setItem('@userId', userId);
           await AsyncStorage.setItem('@sessionToken', sessionToken);
           await AsyncStorage.removeItem('@accessToken');
-          // navigation.dispatch(
-          //   CommonActions.reset({
-          //     index: 0,
-          //     routes: [
-          //       { name: 'Profile',
-          //         params: { incognito: true }
-          //       },
-          //     ],
-          //   })
-          // );
-          navigation.navigate('Profile');
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Profile',
+              },
+            ],
+          })
         }
       }
       ,(error) => {
@@ -216,16 +210,14 @@ const LoginScreen = ({ navigation }) => {
 
   onSignInSuccess = (state) => {
     if(state) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'Profile',
-            },
-          ],
-        })
-      );
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Profile',
+          },
+        ],
+      })
     }
   }
   /*
@@ -286,7 +278,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <Background>
-      <BackButton goBack={() => navigation.navigate('Home')} />
+      <BackButton goBack={() => navigation.goBack()} />
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
         <View style={styles.inputContainer}>
             <Spinner
