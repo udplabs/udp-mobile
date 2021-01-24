@@ -13,11 +13,11 @@ const IDVerification = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   onLoad = async(state) => {
-    setIsLoading(false);
+    console.log('----', state.url);
     if(state.url.indexOf('?#/done') >= 0) {
       await AsyncStorage.setItem('@uploadedID', id);
       route.params.onGoBack();
-      await navigation.goBack();
+      navigation.goBack();
     }
   }
 
@@ -45,7 +45,8 @@ const IDVerification = ({ route, navigation }) => {
       }
       <WebView
         source={{ uri }}
-        onLoadStart={(event) => onLoad(event.nativeEvent)}
+        onLoad={() => setIsLoading(false)}
+        onNavigationStateChange={onLoad}
         incognito={true}
       />
     </View>
