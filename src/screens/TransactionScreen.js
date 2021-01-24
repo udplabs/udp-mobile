@@ -69,8 +69,8 @@ const successMessage = 'Transaction has been successfully authorized.';
 const TransactionScreen = ({ route, navigation }) => {
   const [bannerVisible, setBannerVisible] = useState(false);
   const [message, setMessage] = useState(successMessage);
-  const [fromAccount, setFromAccount] = useState(null);
-  const [toAccount, setToAccount] = useState(null);
+  const [fromAccount, setFromAccount] = useState(accounts[0].value);
+  const [toAccount, setToAccount] = useState(accounts[1].value);
   const [showFromDropDown, setShowFromDropDown] = useState(false);
   const [showToDropDown, setShowToDropDown] = useState(false);
   const [amount, setAmount] = useState({ value: '', error: ''});
@@ -120,9 +120,6 @@ const TransactionScreen = ({ route, navigation }) => {
   }
 
   displayBanner = (status) => {
-    // setMessage(status ? successMessage : 'An error has occured.')
-    // setBannerVisible(true);
-    console.log('banner---')
     if(status) {
       Alert.alert(
         'Success',
