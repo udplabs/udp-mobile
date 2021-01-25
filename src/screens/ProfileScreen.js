@@ -11,7 +11,6 @@ import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearTokens } from '@okta/okta-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { CommonActions } from '@react-navigation/native';
 import axios from 'axios';
 
 import Header from '../components/Header';
@@ -38,7 +37,6 @@ export class ProfileScreen extends React.Component {
   }
 
   async componentDidMount() {
-    console.log('profile---');
     const { navigation } = this.props;
 
     const accessToken = await AsyncStorage.getItem('@accessToken');
@@ -50,29 +48,8 @@ export class ProfileScreen extends React.Component {
           userId = result.uid;
         }
         this.setState({ userId }, async () => {
-          // Checking if the user accepted the permission
-          const acceptedUsers = await AsyncStorage.getItem('@acceptedUsers');
-          const userArray = JSON.parse(acceptedUsers) || [];
-          if(userArray.indexOf(userId) < 0)  {
-            Alert.alert(
-              'Terms and Conditions',
-              termsText,
-              [
-                { text: 'Agree', onPress: async () => {
-                  userArray.push(userId);
-                  await AsyncStorage.setItem('@acceptedUsers', JSON.stringify(userArray));
-                  await this.loadProfile();
-                  navigation.addListener('focus', this.loadProfile);
-                } },
-                { text: 'Disagree', onPress: () => this.logout(), style: 'cancel'}
-              ],
-              { cancelable: false }
-            );
-          } else {
-            
-            await this.loadProfile();
-            navigation.addListener('focus', this.loadProfile);
-          }
+          // Checking if the user accepted the permissio
+          await this.loadProfile();
         });
       });
     } else {
@@ -99,7 +76,7 @@ export class ProfileScreen extends React.Component {
   }
 
   loadProfile = async () => {
-    console.log('loadprofile-----');
+    const { navigation } = this.props;
     const { accessToken, userId } = this.state;
     if(accessToken) {
       this.setState({ progress: true });
@@ -110,7 +87,48 @@ export class ProfileScreen extends React.Component {
       )
       .then(response => {
         const { data } = response;
-        this.setState({ progress: false, user: data.profile });
+        if(!data.profile.consent) {
+          Alert.alert(
+            'Terms and Conditions',
+            termsText,
+            [
+              {
+                text: 'Agree',
+                onPress: async () => {
+                  this.setState({ progress: true });
+                  axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+                    profile: {
+                      ...data.profile,
+                      consent: true
+                    }
+                  }, {
+                    headers: {
+                      Authorization: `Bearer ${accessToken}`
+                    }
+                  })
+                  .then(response => {
+                    this.setState({ progress: false, user: data.profile });
+                    navigation.addListener('focus', this.loadProfile);
+                  })
+                  .catch((error) => {
+                    Alert.alert(
+                      'Error',
+                      'An error has occured, please try again.',
+                      [
+                        { text: 'OK', onPress: () => {this.setState({ progress: false, user: data.profile })} }
+                      ],
+                      { cancelable: false }
+                    );
+                  })
+                }
+              },
+              { text: 'Disagree', onPress: () => this.logout(), style: 'cancel'}
+            ],
+            { cancelable: false }
+          );
+        } else {
+          this.setState({ progress: false, user: data.profile });
+        }
       }
       ,(e) => {
 

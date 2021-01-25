@@ -1,6 +1,5 @@
 import React, { memo, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
 import {
   isAuthenticated,
   getUserFromIdToken,
@@ -281,11 +280,11 @@ const LoginScreen = ({ navigation }) => {
       <BackButton goBack={() => navigation.goBack()} />
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
         <View style={styles.inputContainer}>
-            <Spinner
-              visible={loading}
-              textContent={'Loading...'}
-              textStyle={styles.spinnerTextStyle}
-            />
+          <Spinner
+            visible={loading}
+            textContent={'Loading...'}
+            textStyle={styles.spinnerTextStyle}
+          />
           <Logo />
           <Header>Welcome back</Header>
 
