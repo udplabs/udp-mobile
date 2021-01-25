@@ -84,7 +84,6 @@ export class ProfileScreen extends React.Component {
   }
 
   onSignInSuccess = async (state) => {
-    console.log('siginsuccess profile--', state);
     if(state) {
       await this.loadProfile();
     } else {

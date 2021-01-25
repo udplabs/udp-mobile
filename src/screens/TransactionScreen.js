@@ -98,7 +98,6 @@ const TransactionScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const { user } = route.params;
-    console.log('user---', user);
     if(user) {
       const list = [];
       for(let item of requiredFields) {
@@ -231,7 +230,13 @@ const TransactionScreen = ({ route, navigation }) => {
                   label={'From Account'}
                   mode={'outlined'}
                   value={fromAccount}
-                  setValue={setFromAccount}
+                  setValue={(value) => {
+                    setFromAccount(value);
+                    if(toAccount === value) {
+                      const newValue = accounts.filter(item => item.value !== value)[0].value;
+                      setToAccount(newValue);
+                    }
+                  }}
                   list={accounts}
                   visible={showFromDropDown}
                   showDropDown={() => setShowFromDropDown(true)}
@@ -246,7 +251,13 @@ const TransactionScreen = ({ route, navigation }) => {
                   label={'To Account'}
                   mode={'outlined'}
                   value={toAccount}
-                  setValue={setToAccount}
+                  setValue={(value) => {
+                    setToAccount(value);
+                    if(fromAccount === value) {
+                      const newValue = accounts.filter(item => item.value !== value)[0].value;
+                      setFromAccount(newValue);
+                    }
+                  }}
                   list={accounts}
                   visible={showToDropDown}
                   showDropDown={() => setShowToDropDown(true)}
