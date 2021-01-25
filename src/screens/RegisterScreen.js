@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import ConfirmGoogleCaptcha from 'react-native-google-recaptcha-v2';
-
+import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -27,6 +27,7 @@ const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
+  const [loading, setLoading] = useState(false);
 
   onMessage = event => {
     if (event && event.nativeEvent.data) {
@@ -38,7 +39,7 @@ const RegisterScreen = ({ navigation }) => {
         setTimeout(() => {
           captchaForm.hide();
           const url = `${configFile.customUrl}/proxy/udp-mobile/users?activate=true`;
-
+          setLoading(true);
           axios.post(url, {
             profile: {
               firstName: firstName.value,
@@ -59,6 +60,7 @@ const RegisterScreen = ({ navigation }) => {
           }
           )
           .then(response => {
+            setLoading(false);
             Alert.alert(
               'Signup',
               'You have signed up successfully. Please login to continue.',
@@ -69,7 +71,7 @@ const RegisterScreen = ({ navigation }) => {
             );
           }
           ,(error) => {
-
+            setLoading(false);
             Alert.alert(
               'Error',
               'An error has occured, please try again.',
@@ -109,6 +111,11 @@ const RegisterScreen = ({ navigation }) => {
       <BackButton goBack={() => navigation.goBack()} />
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
         <View style={styles.inputContainer}>
+          <Spinner
+            visible={loading}
+            textContent={'Loading...'}
+            textStyle={styles.spinnerTextStyle}
+          />
           <Logo />
 
           <Header>Create Account</Header>
@@ -211,10 +218,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.primary,
   },
-  termsButton: {
-    padding: 0,
-    margin: 0,
-  }
+  spinnerTextStyle: {
+    color: '#FFF',
+  },
 });
 
 export default memo(RegisterScreen);
