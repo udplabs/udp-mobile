@@ -107,7 +107,7 @@ export class ProfileScreen extends React.Component {
                     }
                   })
                   .then(response => {
-                    this.setState({ progress: false, user: data.profile });
+                    this.setState({ progress: false, user: response.data.profile });
                     navigation.addListener('focus', this.loadProfile);
                   })
                   .catch((error) => {
