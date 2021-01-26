@@ -65,7 +65,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const { accessToken } = route.params;
     if(accessToken) {
       setLoading(true);
-      axios.post(`${configFile.customUrl}/evidentio/token`, {
+      axios.post(`${configFile.customAPIUrl}/evidentio/token`, {
         subdomain: "udp-mobile",
         app: "udp-mobile",
       }, {
@@ -101,7 +101,7 @@ const EditProfileScreen = ({ route, navigation }) => {
     const { accessToken } = route.params;
     const id = await AsyncStorage.getItem('@uploadedID');
     setLoading(true);
-    axios.post(`${configFile.customUrl}/evidentio/updateidentity`, {
+    axios.post(`${configFile.customAPIUrl}/evidentio/updateidentity`, {
       evident_id: id,
       subdomain: "udp-mobile",
       app: "udp-mobile",
@@ -145,7 +145,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setLoading(true);
       // Checking if the user accepted the permission
       
-      axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+      axios.get(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }}
@@ -199,7 +199,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setPage(1);
     } else if(page === 1) {
       setLoading(true);
-      axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+      axios.put(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
         profile: {
           firstName: firstName.value,
           lastName: lastName.value,

@@ -38,7 +38,7 @@ const RegisterScreen = ({ navigation }) => {
         console.log('Verified code from Google', event.nativeEvent.data);
         setTimeout(() => {
           captchaForm.hide();
-          const url = `${configFile.customUrl}/proxy/udp-mobile/users?activate=true`;
+          const url = `${configFile.customAPIUrl}/proxy/udp-mobile/users?activate=true`;
           setLoading(true);
           axios.post(url, {
             profile: {

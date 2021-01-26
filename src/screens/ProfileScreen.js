@@ -80,7 +80,7 @@ export class ProfileScreen extends React.Component {
     const { accessToken, userId } = this.state;
     if(accessToken) {
       this.setState({ progress: true });
-      axios.get(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+      axios.get(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }}
@@ -96,7 +96,7 @@ export class ProfileScreen extends React.Component {
                 text: 'Agree',
                 onPress: async () => {
                   this.setState({ progress: true });
-                  axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+                  axios.put(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
                     profile: {
                       ...data.profile,
                       consent: true

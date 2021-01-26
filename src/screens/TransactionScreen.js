@@ -161,7 +161,7 @@ const TransactionScreen = ({ route, navigation }) => {
   onUpdateProfile = () => {
     const { accessToken, userId, user } = route.params;
     setLoading(true);
-    axios.put(`${configFile.customUrl}/proxy/udp-mobile/users/${userId}`, {
+    axios.put(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
       profile: {
         ...user,
         ...modalValues.zipCode.value && { zipCode: modalValues.zipCode.value },
