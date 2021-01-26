@@ -176,7 +176,7 @@ const EditProfileScreen = ({ route, navigation }) => {
   }
 
   _onSave = async () => {
-    const { accessToken } = route.params;
+    const { accessToken, user } = route.params;
     if(page === 0) {
       const firstNameError = nameValidator(firstName.value);
       const lastNameError = nameValidator(lastName.value);
@@ -200,6 +200,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setLoading(true);
       axios.put(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
         profile: {
+          ...user,
           firstName: firstName.value,
           lastName: lastName.value,
           email: email.value,
