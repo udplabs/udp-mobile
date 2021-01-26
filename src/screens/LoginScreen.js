@@ -219,44 +219,6 @@ const LoginScreen = ({ navigation }) => {
       })
     }
   }
-  /*
-  useEffect(() => {
-    EventEmitter.addListener('signInSuccess', async function(e) {
-      await AsyncStorage.setItem('@accessToken', e.access_token);
-      setAuthenticated(true);
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            { name: 'Profile' },
-          ],
-        })
-      );
-
-      setContext('Logged in!');
-    });
-    EventEmitter.addListener('signOutSuccess', function(e) {
-      setAuthenticated(true);
-      setContext('Logged out!');
-    });
-    EventEmitter.addListener('onError', function(e) {
-      console.log(e);
-      setContext(e.error_message);
-    });
-    EventEmitter.addListener('onCancelled', function(e) {
-      console.log(e);
-    });
-   
-    checkAuthentication();
-    
-    return () => {
-      EventEmitter.removeAllListeners('signInSuccess');
-      EventEmitter.removeAllListeners('signOutSuccess');
-      EventEmitter.removeAllListeners('onError');
-      EventEmitter.removeAllListeners('onCancelled');
-    };
-  }, []);
-*/
 
   checkAuthentication = async () => {
     const result = await isAuthenticated();
