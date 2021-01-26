@@ -9,7 +9,7 @@ import {
 import jwt from 'jwt-lite';
 import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { clearTokens } from '@okta/okta-react-native';
+
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
@@ -160,35 +160,27 @@ export class ProfileScreen extends React.Component {
   logout = async () => {
     const { navigation } = this.props;
  
-    clearTokens()
-    .then(() => {
-    })
-    .catch(async e => {
-      //this.setState({ error: e.message })
-    })
-    .finally(e => {
-      CookieManager.clearAll(useWebKit)
-        .then((success) => {
-          console.log('CookieManager.clearAll =>', success);
-          AsyncStorage.getAllKeys()
-          .then(keys => {
-            if(keys.indexOf('@acceptedUsers') > -1) {
-              keys.splice(keys.indexOf('@acceptedUsers'), 1);
-            }
-            AsyncStorage.multiRemove(keys);
+    CookieManager.clearAll(useWebKit)
+      .then((success) => {
+        console.log('CookieManager.clearAll =>', success);
+        AsyncStorage.getAllKeys()
+        .then(keys => {
+          if(keys.indexOf('@acceptedUsers') > -1) {
+            keys.splice(keys.indexOf('@acceptedUsers'), 1);
+          }
+          AsyncStorage.multiRemove(keys);
+        })
+        .then(() => {
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Home',
+              },
+            ],
           })
-          .then(() => {
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: 'Home',
-                },
-              ],
-            })
-          });
         });
-    });
+      });
   }
 
   render() {
