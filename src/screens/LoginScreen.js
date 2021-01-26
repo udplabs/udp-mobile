@@ -1,9 +1,6 @@
 import React, { memo, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
-import {
-  isAuthenticated,
-  getUserFromIdToken,
-} from '@okta/okta-react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -218,23 +215,6 @@ const LoginScreen = ({ navigation }) => {
         ],
       })
     }
-  }
-
-  checkAuthentication = async () => {
-    const result = await isAuthenticated();
-    const userId = await AsyncStorage.getItem('@userId');
-    const accessToken = await AsyncStorage.getItem('@accessToken');
-    if (result.authenticated !== !!accessToken || !!userId) {
-      setAuthenticated(result.authenticated);
-    }
-  }
-
-  getUserIdToken = async () => {
-    let user = await getUserFromIdToken();
-    setContext(`
-      User Profile:
-      ${JSON.stringify(user, null, 4)}
-    `);
   }
 
   return (

@@ -50,12 +50,13 @@ export class ProfileScreen extends React.Component {
         this.setState({ userId }, async () => {
           // Checking if the user accepted the permissio
           await this.loadProfile();
+          navigation.addListener('focus', this.loadProfile);
         });
       });
     } else {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
       const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&&sessionToken=${sessionToken}`;
-      console.log('loading webview from profile');
+      console.log('loading webview from profile', uri);
       navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
     }
   }
@@ -87,7 +88,7 @@ export class ProfileScreen extends React.Component {
       )
       .then(response => {
         const { data } = response;
-        if(!data.profile.consent) {
+        if(!data.profile[configFile.consentField]) {
           Alert.alert(
             'Terms and Conditions',
             termsText,
@@ -96,11 +97,10 @@ export class ProfileScreen extends React.Component {
                 text: 'Agree',
                 onPress: async () => {
                   this.setState({ progress: true });
+                  const newProfile = data.profile;
+                  newProfile[configFile.consentField] = true;
                   axios.put(`${configFile.customAPIUrl}/proxy/udp-mobile/users/${userId}`, {
-                    profile: {
-                      ...data.profile,
-                      consent: true
-                    }
+                    profile: newProfile
                   }, {
                     headers: {
                       Authorization: `Bearer ${accessToken}`
@@ -108,7 +108,6 @@ export class ProfileScreen extends React.Component {
                   })
                   .then(response => {
                     this.setState({ progress: false, user: response.data.profile });
-                    navigation.addListener('focus', this.loadProfile);
                   })
                   .catch((error) => {
                     Alert.alert(

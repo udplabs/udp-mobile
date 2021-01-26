@@ -3,6 +3,7 @@ import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import configFile from '../../samples.config';
 
 const HomeScreen = ({ navigation }) => {
   _onFacebookLogin = async () => {
@@ -20,7 +21,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <Background>
       <Logo />
-      <Header>UDP Mobile</Header>
+      <Header>{configFile.app_name}</Header>
 
       <Button mode="contained" onPress={() => navigation.navigate('Login')}>
         Login with email

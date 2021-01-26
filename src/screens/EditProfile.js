@@ -52,7 +52,6 @@ const EditProfileScreen = ({ route, navigation }) => {
 
     async function getIdStatus () {
       const idStatus = await AsyncStorage.getItem('@idStatus');
-      console.log('-----', idStatus)
       if(idStatus) {
         setIdStatus(idStatus);
       }

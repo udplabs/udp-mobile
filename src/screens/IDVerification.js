@@ -13,7 +13,6 @@ const IDVerification = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   onLoad = async(state) => {
-    console.log('----', state.url);
     if(state.url.indexOf('?#/done') >= 0) {
       await AsyncStorage.setItem('@uploadedID', id);
       route.params.onGoBack();
