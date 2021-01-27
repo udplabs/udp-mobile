@@ -14,6 +14,7 @@ let consentField = 'udp_mobile_react_native_demo_consent_flag';
 let facebookIDP = '0oavyrdmiygFJn4GX0h7';
 let googleIDP = '0oaw402206kWFqFPj0h7';
 let appleIDP = '0oaw729qicIxZkUtN0h7';
+let reCaptchaBaseUrl = 'https://udp-udp-mobile-6aa.oktapreview.com';
 
 if(Platform.OS === 'ios') {
   clientId = Settings.get('clientId') || clientId;
@@ -22,6 +23,10 @@ if(Platform.OS === 'ios') {
   app_name = Settings.get('app_name') || app_name;
   customAPIUrl = Settings.get('customAPIUrl') || customAPIUrl;
   reCaptchaSiteKey = Settings.get('reCaptchaSiteKey') || reCaptchaSiteKey;
+
+  const splitArray = issuer.split('/');
+  reCaptchaBaseUrl = Settings.get('reCaptchaSiteKey') ? `${splitArray[0]}//${splitArray[2]}` : reCaptchaBaseUrl;
+
   nonce = Settings.get('nonce') || nonce;
   transactionalMfaClientId = Settings.get('transactionalMfaClientId') || transactionalMfaClientId;
   consentField = Settings.get('consentField') || consentField;
@@ -30,16 +35,21 @@ if(Platform.OS === 'ios') {
   appleIDP = Settings.get('appleIDP') || appleIDP;
   title = Settings.get('title') || title;
   logoUrl = Settings.get('logoUrl') || logoUrl;
+
 } else if(Platform.OS === 'android') {
   const SharedPreferences = require('react-native-shared-preferences');
   SharedPreferences.setName('prefs.db');
-  SharedPreferences.getItems(['clientId', 'issuer',' udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl'], function(value){
+  SharedPreferences.getItems(['clientId', 'issuer',' udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl'], function(values){
     clientId = values[0] || clientId;
     issuer = values[1] || issuer;
     udp_subdomain = values[2] || udp_subdomain;
     app_name = values[3] || app_name;
     customAPIUrl = values[4] || customAPIUrl;
     reCaptchaSiteKey = values[5] || reCaptchaSiteKey;
+
+    const splitArray = issuer.split('/');
+    reCaptchaBaseUrl = values[5] ? `${splitArray[0]}//${splitArray[2]}` : reCaptchaBaseUrl;
+
     nonce = values[6] || nonce;
     transactionalMfaClientId = values[7] || transactionalMfaClientId;
     consentField = values[8] || consentField;
@@ -62,7 +72,7 @@ export default {
   udp_subdomain,
   authUri,
   reCaptchaSiteKey,
-  reCaptchaBaseUrl: `${splitArray[0]}//${splitArray[2]}`,
+  reCaptchaBaseUrl,
   nonce,
   customAPIUrl,
   consentField,
