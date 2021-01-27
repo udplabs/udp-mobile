@@ -18,8 +18,11 @@ let app_name = 'UDP React Native Demo';
 let customAPIUrl = 'https://j8d461nbhb.execute-api.us-east-2.amazonaws.com/dev';
 let reCaptchaSiteKey = '6LfQExQaAAAAAKOtmshnR544I5qQkp-vfYJ2TGyL';
 let nonce = '52b839be-3b79-4d09-a933-ef04bd34491f';
-let transactionalMFAClientId = '0oaw9qibcih6mwAiI0h7';
+let transactionalMfaClientId = '0oaw9qibcih6mwAiI0h7';
 let consentField = 'udp_mobile_react_native_demo_consent_flag';
+let facebookIDP = '0oavyrdmiygFJn4GX0h7';
+let googleIDP = '0oaw402206kWFqFPj0h7';
+let appleIDP = '0oaw729qicIxZkUtN0h7';
 
 if(Platform.OS === 'ios') {
   clientId = Settings.get('clientId') || clientId;
@@ -29,12 +32,15 @@ if(Platform.OS === 'ios') {
   customAPIUrl = Settings.get('customAPIUrl') || customAPIUrl;
   reCaptchaSiteKey = Settings.get('reCaptchaSiteKey') || reCaptchaSiteKey;
   nonce = Settings.get('nonce') || nonce;
-  transactionalMFAClientId = Settings.get('transactionalMFAClientId') || transactionalMFAClientId;
+  transactionalMfaClientId = Settings.get('transactionalMfaClientId') || transactionalMfaClientId;
   consentField = Settings.get('consentField') || consentField;
+  facebookIDP = Settings.get('facebookIDP') || facebookIDP;
+  googleIDP = Settings.get('googleIDP') || googleIDP;
+  appleIDP = Settings.get('appleIDP') || appleIDP;
 } else if(Platform.OS === 'android') {
   const SharedPreferences = require('react-native-shared-preferences');
   SharedPreferences.setName('prefs.db');
-  SharedPreferences.getItems(['clientId', 'issuer',' udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField'], function(value){
+  SharedPreferences.getItems(['clientId', 'issuer',' udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP'], function(value){
     clientId = values[0] || clientId;
     issuer = values[1] || issuer;
     udp_subdomain = values[2] || udp_subdomain;
@@ -42,8 +48,11 @@ if(Platform.OS === 'ios') {
     customAPIUrl = values[4] || customAPIUrl;
     reCaptchaSiteKey = values[5] || reCaptchaSiteKey;
     nonce = values[6] || nonce;
-    transactionalMFAClientId = values[7] || transactionalMFAClientId;
+    transactionalMfaClientId = values[7] || transactionalMfaClientId;
     consentField = values[8] || consentField;
+    facebookIDP = values[9] || facebookIDP;
+    googleIDP = values[10] || googleIDP;
+    appleIDP = values[11] || appleIDP;
   });
 }
 const splitArray = issuer.split('/');
@@ -60,6 +69,7 @@ export default {
     requireHardwareBackedKeyStore: false,
   },
   baseUri,
+  udp_subdomain,
   authUri,
   reCaptchaSiteKey,
   reCaptchaBaseUrl: `${splitArray[0]}//${splitArray[2]}`,
@@ -67,6 +77,11 @@ export default {
   customAPIUrl,
   consentField,
   transactionalMFA: {
-    clientId: transactionalMFAClientId,
+    clientId: transactionalMfaClientId,
   },
+  idps: {
+    facebook: facebookIDP,
+    google: googleIDP,
+    apple: appleIDP,
+  }
 };

@@ -12,12 +12,8 @@ const height = Dimensions.get('window').height;
 const SocialLoginModal = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { mode } = route.params;
-  let idp = '0oavyrdmiygFJn4GX0h7';
-  if (mode === 'google') {
-    idp = '0oaw402206kWFqFPj0h7';
-  } else if(mode === 'apple') {
-    idp = '0oaw729qicIxZkUtN0h7';
-  }
+  
+  const idp = configFile.idps[mode];
   const uri = `${configFile.authUri}?idp=${idp}&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
   
   onLoad = async(state) => {
