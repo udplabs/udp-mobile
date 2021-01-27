@@ -5,6 +5,7 @@ import {
   Alert,
   View,
   ScrollView,
+  Platform,
 } from 'react-native';
 import jwt from 'jwt-lite';
 import CookieManager from '@react-native-cookies/cookies';
@@ -17,10 +18,11 @@ import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
 import Error from '../components/Error';
+import { theme } from '../core/theme';
 import configFile from '../../samples.config';
 
 const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-const useWebKit = true;
+const useWebKit = Platform.OS === 'ios';
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
@@ -55,7 +57,7 @@ export class ProfileScreen extends React.Component {
       });
     } else {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
-      const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&&sessionToken=${sessionToken}`;
+      const uri = `${configFile.authUri}?client_id=${configFile.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&&sessionToken=${sessionToken}`;
       console.log('loading webview from profile', uri);
       navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
     }
@@ -246,11 +248,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  logoutButton: {
-    paddingLeft: 10,
-    fontSize: 16,
-    color: '#0066cc'
-  },
   container: {
     flex: 1,
     paddingTop: 40,
@@ -262,7 +259,7 @@ const styles = StyleSheet.create({
   titleHello: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0066cc',
+    color: theme.colors.secondary,
     paddingTop: 40
   },
   titleDetails: {

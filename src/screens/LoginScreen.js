@@ -19,8 +19,6 @@ import configFile from '../../samples.config';
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
-  const [authenticated, setAuthenticated] = useState(false);
-  const [context, setContext] = useState(null);
   const [fingerprint, setFingerprint] = useState(null);
   const [loading, setLoading] = useState(false);
   const _onLoginPressed = () => {
@@ -159,7 +157,7 @@ const LoginScreen = ({ navigation }) => {
   };
   
   _onWebLoginPressed = () => {
-    const uri = `${configFile.authUri}?client_id=${configFile.oidc.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+    const uri = `${configFile.authUri}?client_id=${configFile.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
     navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
   }
 

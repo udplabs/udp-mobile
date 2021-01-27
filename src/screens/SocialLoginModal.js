@@ -14,7 +14,7 @@ const SocialLoginModal = ({ route, navigation }) => {
   const { mode } = route.params;
   
   const idp = configFile.idps[mode];
-  const uri = `${configFile.authUri}?idp=${idp}&client_id=${configFile.oidc.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
+  const uri = `${configFile.authUri}?idp=${idp}&client_id=${configFile.clientId}&response_type=token&response_mode=fragment&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=YsG76jo`;
   
   onLoad = async(state) => {
     setIsLoading(false);

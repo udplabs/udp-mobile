@@ -68,8 +68,6 @@ const requiredFields = [
 const successMessage = 'Transaction has been successfully authorized.';
 
 const TransactionScreen = ({ route, navigation }) => {
-  const [bannerVisible, setBannerVisible] = useState(false);
-  const [message, setMessage] = useState(successMessage);
   const [fromAccount, setFromAccount] = useState(accounts[0].value);
   const [toAccount, setToAccount] = useState(accounts[1].value);
   const [showFromDropDown, setShowFromDropDown] = useState(false);

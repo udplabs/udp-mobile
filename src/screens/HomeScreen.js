@@ -21,7 +21,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <Background>
       <Logo />
-      <Header>{configFile.app_name}</Header>
+      <Header>{configFile.title}</Header>
 
       <Button mode="contained" onPress={() => navigation.navigate('Login')}>
         Login with email
