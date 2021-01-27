@@ -10,8 +10,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@okta/configuration-validation": "^1.0.0",
-    "@okta/okta-react-native": "^1.4.4",
     "@react-native-async-storage/async-storage": "^1.13.2",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-cookies/cookies": "^6.0.4",
@@ -19,6 +17,7 @@
     "@react-navigation/stack": "^5.12.6",
     "axios": "^0.21.0",
     "events": "^3.2.0",
+    "jwt-lite": "^2.1.0",
     "react": "17.0.1",
     "react-native": "0.63.3",
     "react-native-biometrics": "^2.1.4",

@@ -19,18 +19,6 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - OktaOidc (3.9.2):
-    - OktaOidc/AppAuth (= 3.9.2)
-    - OktaOidc/Okta (= 3.9.2)
-  - OktaOidc/AppAuth (3.9.2)
-  - OktaOidc/Okta (3.9.2):
-    - OktaOidc/AppAuth
-    - OktaOidc/Okta/Classes (= 3.9.2)
-  - OktaOidc/Okta/Classes (3.9.2):
-    - OktaOidc/AppAuth
-  - OktaSdkBridgeReactNative (1.4.4):
-    - OktaOidc (= 3.9.2)
-    - React
   - RCTRequired (0.63.3)
   - RCTTypeSafety (0.63.3):
     - FBLazyVector (= 0.63.3)
@@ -287,7 +275,6 @@ DEPENDENCIES:
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
-  - "OktaSdkBridgeReactNative (from `../node_modules/@okta/okta-react-native`)"
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
   - React (from `../node_modules/react-native/`)
@@ -326,7 +313,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - boost-for-react-native
-    - OktaOidc
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -339,8 +325,6 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/Folly.podspec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
-  OktaSdkBridgeReactNative:
-    :path: "../node_modules/@okta/okta-react-native"
   RCTRequired:
     :path: "../node_modules/react-native/Libraries/RCTRequired"
   RCTTypeSafety:
@@ -413,8 +397,6 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: 7da9338acfb98d4ef9e5536805a0704572d33c2f
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
-  OktaOidc: 0daa496af1b708564bfb0fa353310562ee170369
-  OktaSdkBridgeReactNative: dd44274cf08176eeb06c24f91c57bc8a1b3fbc3e
   RCTRequired: 48884c74035a0b5b76dbb7a998bd93bcfc5f2047
   RCTTypeSafety: edf4b618033c2f1c5b7bc3d90d8e085ed95ba2ab
   React: f36e90f3ceb976546e97df3403e37d226f79d0e3
