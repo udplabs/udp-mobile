@@ -1,8 +1,8 @@
 import { Settings, Platform } from 'react-native';
 import { DefaultTheme } from 'react-native-paper';
-let primaryColor = '#600EE6';
-let secondaryColor = '#414757';
-let errorColor = '#f13a59';
+let primaryColor = '#C01A98';
+let secondaryColor = '#00FF1E';
+let errorColor = 'yellow';
 
 if(Platform.OS === 'ios') {
   primaryColor = Settings.get('primaryColor') || primaryColor;
