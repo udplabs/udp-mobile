@@ -164,7 +164,7 @@ const LoginScreen = ({ navigation }) => {
   const _onTouchIDPressed = async () => {
     const { available, biometryType } = await ReactNativeBiometrics.isSensorAvailable()
     
-    if (biometryType === ReactNativeBiometrics.TouchID) {
+    if (biometryType === ReactNativeBiometrics.TouchID || biometryType === ReactNativeBiometrics.Biometrics) {
       ReactNativeBiometrics.createKeys('Confirm fingerprint')
       .then((resultObject) => {
         const { publicKey } = resultObject
