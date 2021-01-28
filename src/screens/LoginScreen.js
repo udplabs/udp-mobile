@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
@@ -218,7 +218,8 @@ const LoginScreen = ({ navigation }) => {
   return (
     <Background>
       <BackButton goBack={() => navigation.goBack()} />
-      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView behavior='height' style={{ width: '100%', padding: 0 }} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}>
+        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
         <View style={styles.inputContainer}>
           <Spinner
             visible={loading}
@@ -278,7 +279,8 @@ const LoginScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Background>
   );
 };

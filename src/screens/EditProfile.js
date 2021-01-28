@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { View, Alert, StyleSheet, Text, ScrollView } from 'react-native';
+import { View, Alert, StyleSheet, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -253,7 +253,8 @@ const EditProfileScreen = ({ route, navigation }) => {
 
   return <Background>
     <BackButton goBack={() => navigation.goBack()} />
-    <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView behavior='height' style={{ width: '100%', padding: 0 }} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}>
+        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
       <View style={styles.container}>
         <Spinner
           visible={loading}
@@ -405,7 +406,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       }
       </View>
      </ScrollView>
-   
+   </KeyboardAvoidingView>
    
   </Background>
 };
@@ -417,8 +418,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     width: '100%',
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 30,
+    paddingVertical: 30,
   },
   inputContainer: {
     alignItems: 'center',

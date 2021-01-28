@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ScrollView, Alert, Dimensions } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, Alert, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import {
   Subheading,
   Title,
@@ -207,7 +207,8 @@ const TransactionScreen = ({ route, navigation }) => {
       <BackButton goBack={() => navigation.goBack()} />
       {
         modalVisible && fields.length > 0 ? 
-          <ScrollView style={{ width }} showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView behavior='height' style={{ width: '100%', padding: 0 }} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}>
+          <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
             <View style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', height, justifyContent: 'center' }}>
               <View style={styles.modalContainer}>
                 <Header>Update Profile</Header>
@@ -234,84 +235,87 @@ const TransactionScreen = ({ route, navigation }) => {
                 </Button>
               </View>
             </View>
-          </ScrollView> : (
-          <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
-            <View style={styles.container}>
-              <Header>Account</Header>
-              <View style={styles.inputContainer}>
-                <View style={styles.panel}>
-                  <Title>Account History</Title>
-                  <Subheading>Balance Details</Subheading>
-                  {
-                    history.map(item => (
-                      <View key={item.detail} style={styles.row}>
-                        <Text style={styles.itemDetail}>{item.detail}</Text>
-                        <Text style={styles.amount}>{`$${item.balance}`}</Text>
-                      </View>
-                    ))
-                  }
-                </View>
-                <View style={styles.panel}>
-                  <Title>Transfer Money</Title> 
-                  <View style={styles.row}>
-                    <DropDown
-                      label={'From Account'}
-                      mode={'outlined'}
-                      value={fromAccount}
-                      setValue={(value) => {
-                        setFromAccount(value);
-                        if(toAccount === value) {
-                          const newValue = accounts.filter(item => item.value !== value)[0].value;
-                          setToAccount(newValue);
-                        }
-                      }}
-                      list={accounts}
-                      visible={showFromDropDown}
-                      showDropDown={() => setShowFromDropDown(true)}
-                      onDismiss={() => setShowFromDropDown(false)}
-                      inputProps={{
-                        right: <Input.Icon name={'menu-down'} />,
-                      }}
-                    />
-                  </View>
-                  <View style={styles.row}>
-                    <DropDown
-                      label={'To Account'}
-                      mode={'outlined'}
-                      value={toAccount}
-                      setValue={(value) => {
-                        setToAccount(value);
-                        if(fromAccount === value) {
-                          const newValue = accounts.filter(item => item.value !== value)[0].value;
-                          setFromAccount(newValue);
-                        }
-                      }}
-                      list={accounts}
-                      visible={showToDropDown}
-                      showDropDown={() => setShowToDropDown(true)}
-                      onDismiss={() => setShowToDropDown(false)}
-                      inputProps={{
-                        right: <Input.Icon name={'menu-down'} />,
-                      }}
-                    />
-                  </View>
-                  <View style={styles.row}>
-                    <TextInput
-                      label="Amount to Transfer"
-                      value={amount.value}
-                      onChangeText={amount => setAmount({value: amount, error: ''})}
-                      error={!!amount.error}
-                      errorText={amount.error}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
-                <Button mode="contained" onPress={onPayment} style={styles.button}>
-                  Submit Transfer
-                </Button>
-              </View>
-            </View>
           </ScrollView>
+          </KeyboardAvoidingView> : (
+          <KeyboardAvoidingView behavior='height' style={{ width: '100%', padding: 0 }} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}>
+            <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
+              <View style={styles.container}>
+                <Header>Account</Header>
+                <View style={styles.inputContainer}>
+                  <View style={styles.panel}>
+                    <Title>Account History</Title>
+                    <Subheading>Balance Details</Subheading>
+                    {
+                      history.map(item => (
+                        <View key={item.detail} style={styles.row}>
+                          <Text style={styles.itemDetail}>{item.detail}</Text>
+                          <Text style={styles.amount}>{`$${item.balance}`}</Text>
+                        </View>
+                      ))
+                    }
+                  </View>
+                  <View style={styles.panel}>
+                    <Title>Transfer Money</Title> 
+                    <View style={styles.row}>
+                      <DropDown
+                        label={'From Account'}
+                        mode={'outlined'}
+                        value={fromAccount}
+                        setValue={(value) => {
+                          setFromAccount(value);
+                          if(toAccount === value) {
+                            const newValue = accounts.filter(item => item.value !== value)[0].value;
+                            setToAccount(newValue);
+                          }
+                        }}
+                        list={accounts}
+                        visible={showFromDropDown}
+                        showDropDown={() => setShowFromDropDown(true)}
+                        onDismiss={() => setShowFromDropDown(false)}
+                        inputProps={{
+                          right: <Input.Icon name={'menu-down'} />,
+                        }}
+                      />
+                    </View>
+                    <View style={styles.row}>
+                      <DropDown
+                        label={'To Account'}
+                        mode={'outlined'}
+                        value={toAccount}
+                        setValue={(value) => {
+                          setToAccount(value);
+                          if(fromAccount === value) {
+                            const newValue = accounts.filter(item => item.value !== value)[0].value;
+                            setFromAccount(newValue);
+                          }
+                        }}
+                        list={accounts}
+                        visible={showToDropDown}
+                        showDropDown={() => setShowToDropDown(true)}
+                        onDismiss={() => setShowToDropDown(false)}
+                        inputProps={{
+                          right: <Input.Icon name={'menu-down'} />,
+                        }}
+                      />
+                    </View>
+                    <View style={styles.row}>
+                      <TextInput
+                        label="Amount to Transfer"
+                        value={amount.value}
+                        onChangeText={amount => setAmount({value: amount, error: ''})}
+                        error={!!amount.error}
+                        errorText={amount.error}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                  </View>
+                  <Button mode="contained" onPress={onPayment} style={styles.button}>
+                    Submit Transfer
+                  </Button>
+                </View>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         )
       }
     </Background>
@@ -324,8 +328,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     flexDirection: 'column',
     width: '100%',
-    paddingTop: 60,
-    paddingBottom: 30,
+    paddingVertical: 30,
     alignItems: 'center',
   },
   inputContainer: {

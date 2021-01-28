@@ -191,7 +191,7 @@ export class ProfileScreen extends React.Component {
     return (
       <Background>
         
-        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
           <View style={styles.container}>
             <View style={styles.headerRow}>
               <Header>Profile</Header>
@@ -253,8 +253,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     flexDirection: 'column',
     width: '100%',
-    paddingTop: 60,
-    paddingBottom: 30,
+    paddingVertical: 30,
   },
   titleHello: {
     fontSize: 20,

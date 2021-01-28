@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import ConfirmGoogleCaptcha from 'react-native-google-recaptcha-v2';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
@@ -109,92 +109,95 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <Background>
       <BackButton goBack={() => navigation.goBack()} />
-      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
-        <View style={styles.inputContainer}>
-          <Spinner
-            visible={loading}
-            textContent={'Loading...'}
-            textStyle={styles.spinnerTextStyle}
-          />
-          <Logo />
+      <KeyboardAvoidingView behavior='height' style={{ width: '100%', padding: 0 }} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}>
+        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
+        
+          <View style={styles.inputContainer}>
+            <Spinner
+              visible={loading}
+              textContent={'Loading...'}
+              textStyle={styles.spinnerTextStyle}
+            />
+            <Logo />
 
-          <Header>Create Account</Header>
-          <TextInput
-            label="First Name"
-            returnKeyType="next"
-            value={firstName.value}
-            onChangeText={text => setFirstName({ value: text, error: '' })}
-            error={!!firstName.error}
-            errorText={firstName.error}
-          />
+            <Header>Create Account</Header>
+            <TextInput
+              label="First Name"
+              returnKeyType="next"
+              value={firstName.value}
+              onChangeText={text => setFirstName({ value: text, error: '' })}
+              error={!!firstName.error}
+              errorText={firstName.error}
+            />
 
-          <TextInput
-            label="Last Name"
-            returnKeyType="next"
-            value={lastName.value}
-            onChangeText={text => setLastName({ value: text, error: '' })}
-            error={!!lastName.error}
-            errorText={lastName.error}
-          />
+            <TextInput
+              label="Last Name"
+              returnKeyType="next"
+              value={lastName.value}
+              onChangeText={text => setLastName({ value: text, error: '' })}
+              error={!!lastName.error}
+              errorText={lastName.error}
+            />
 
-          <TextInput
-            label="Email"
-            returnKeyType="next"
-            value={email.value}
-            onChangeText={text => setEmail({ value: text, error: '' })}
-            error={!!email.error}
-            errorText={email.error}
-            autoCapitalize="none"
-            autoCompleteType="email"
-            textContentType="emailAddress"
-            keyboardType="email-address"
-          />
-          <TextInput
-            keyboardType="numeric"
-            returnKeyType="next"
-            label="Mobile number"
-            placeholder='Enter mobile number'
-            value={phoneNumber.value}
-            error={!!phoneNumber.error}
-            errorText={phoneNumber.error}
-            onChangeText={(value) => {
-              let num = value.replace(".", '');
-              if(isNaN(num)){
-                  // Its not a number
-              }else{
-                  setPhoneNumber({ value: num, error: ''})}  
+            <TextInput
+              label="Email"
+              returnKeyType="next"
+              value={email.value}
+              onChangeText={text => setEmail({ value: text, error: '' })}
+              error={!!email.error}
+              errorText={email.error}
+              autoCapitalize="none"
+              autoCompleteType="email"
+              textContentType="emailAddress"
+              keyboardType="email-address"
+            />
+            <TextInput
+              keyboardType="numeric"
+              returnKeyType="next"
+              label="Mobile number"
+              placeholder='Enter mobile number'
+              value={phoneNumber.value}
+              error={!!phoneNumber.error}
+              errorText={phoneNumber.error}
+              onChangeText={(value) => {
+                let num = value.replace(".", '');
+                if(isNaN(num)){
+                    // Its not a number
+                }else{
+                    setPhoneNumber({ value: num, error: ''})}  
+                }
               }
-            }
-          />
+            />
 
-          <TextInput
-            label="Password"
-            returnKeyType="done"
-            value={password.value}
-            onChangeText={text => setPassword({ value: text, error: '' })}
-            error={!!password.error}
-            errorText={password.error}
-            secureTextEntry
-          />
-          <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
-            Sign Up
-          </Button>
+            <TextInput
+              label="Password"
+              returnKeyType="done"
+              value={password.value}
+              onChangeText={text => setPassword({ value: text, error: '' })}
+              error={!!password.error}
+              errorText={password.error}
+              secureTextEntry
+            />
+            <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
+              Sign Up
+            </Button>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.link}>Login</Text>
-            </TouchableOpacity>
+            <View style={styles.row}>
+              <Text style={styles.label}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.link}>Login</Text>
+              </TouchableOpacity>
+            </View>
+            <ConfirmGoogleCaptcha
+              ref={_ref => captchaForm = _ref}
+              siteKey={siteKey}
+              baseUrl={baseUrl}
+              languageCode='en'
+              onMessage={onMessage}
+            />
           </View>
-          <ConfirmGoogleCaptcha
-            ref={_ref => captchaForm = _ref}
-            siteKey={siteKey}
-            baseUrl={baseUrl}
-            languageCode='en'
-            onMessage={onMessage}
-          />
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Background>
   );
 };
