@@ -1,10 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import { Button as PaperButton } from 'react-native-paper';
-import { theme } from '../core/theme';
 
-const Button = ({ mode, style, children, ...props }) => (
-  <PaperButton
+import { AppContext } from '../AppContextProvider';
+const Button = ({ mode, style, children, ...props }) => {
+  const { theme } = useContext(AppContext);
+  return <PaperButton
     style={[
       styles.button,
       mode === 'outlined' && { backgroundColor: theme.colors.surface },
@@ -16,7 +17,7 @@ const Button = ({ mode, style, children, ...props }) => (
   >
     {children}
   </PaperButton>
-);
+};
 
 const styles = StyleSheet.create({
   button: {

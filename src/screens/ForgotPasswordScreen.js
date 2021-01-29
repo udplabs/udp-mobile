@@ -6,10 +6,11 @@ import BackButton from '../components/BackButton';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import TextInput from '../components/TextInput';
-import { theme } from '../core/theme';
+import { AppContext } from '../AppContextProvider';
 import Button from '../components/Button';
 
 const ForgotPasswordScreen = ({ navigation }) => {
+  const { theme } = useContext(AppContext);
   const [email, setEmail] = useState({ value: '', error: '' });
 
   const _onSendPressed = () => {
@@ -52,7 +53,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         style={styles.back}
         onPress={() => navigation.navigate('Login')}
       >
-        <Text style={styles.label}>← Back to login</Text>
+        <Text style={[styles.label, {color: theme.colors.secondary}]}>← Back to login</Text>
       </TouchableOpacity>
     </Background>
   );
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   label: {
-    color: theme.colors.secondary,
+
     width: '100%',
   },
 });

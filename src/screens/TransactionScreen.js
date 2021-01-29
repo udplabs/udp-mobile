@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useContext } from 'react';
 import { View, StyleSheet, Text, ScrollView, Alert, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import {
   Subheading,
@@ -13,9 +13,8 @@ import Background from '../components/Background';
 import Header from '../components/Header';
 import Paragraph from '../components/Paragraph';
 import TextInput from '../components/TextInput';
-import { theme } from '../core/theme';
 import Button from '../components/Button';
-import configFile from '../../samples.config';
+import { AppContext } from '../AppContextProvider';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -68,6 +67,7 @@ const requiredFields = [
 const successMessage = 'Transaction has been successfully authorized.';
 
 const TransactionScreen = ({ route, navigation }) => {
+  const { config, theme } = useContext(AppContext);
   const [fromAccount, setFromAccount] = useState(accounts[0].value);
   const [toAccount, setToAccount] = useState(accounts[1].value);
   const [showFromDropDown, setShowFromDropDown] = useState(false);
@@ -112,7 +112,7 @@ const TransactionScreen = ({ route, navigation }) => {
     if(!amount.value || parseFloat(amount.value) <= 0) {
       setAmount({ ...amount, error: 'You have to specify the amount'});
     } else {
-      const uri = `${configFile.authUri}?client_id=${configFile.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+      const uri = `${config.authUri}?client_id=${config.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}`;
       navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status), login: false }, );
     }
   }
@@ -159,7 +159,7 @@ const TransactionScreen = ({ route, navigation }) => {
   onUpdateProfile = () => {
     const { accessToken, userId, user } = route.params;
     setLoading(true);
-    axios.put(`${configFile.customAPIUrl}/proxy/${configFile.udp_subdomain}/users/${userId}`, {
+    axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
       profile: {
         ...user,
         ...modalValues.zipCode.value && { zipCode: modalValues.zipCode.value },
@@ -249,7 +249,7 @@ const TransactionScreen = ({ route, navigation }) => {
                       history.map(item => (
                         <View key={item.detail} style={styles.row}>
                           <Text style={styles.itemDetail}>{item.detail}</Text>
-                          <Text style={styles.amount}>{`$${item.balance}`}</Text>
+                          <Text style={[styles.amount, {color: theme.colors.primary}]}>{`$${item.balance}`}</Text>
                         </View>
                       ))
                     }
@@ -358,7 +358,6 @@ const styles = StyleSheet.create({
   amount: {
     marginTop: 10,
     fontSize: 16,
-    color: theme.colors.primary,
   },
   modalContainer: {
     backgroundColor: 'white',

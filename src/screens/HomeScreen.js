@@ -1,11 +1,12 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
-import configFile from '../../samples.config';
+import { AppContext } from '../AppContextProvider';
 
 const HomeScreen = ({ navigation }) => {
+  const { config } = useContext(AppContext);
   _onFacebookLogin = async () => {
     navigation.navigate('SocialLoginModal', { mode: 'facebook'});
   }
@@ -21,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <Background>
       <Logo />
-      <Header>{configFile.title}</Header>
+      <Header>{config.title}</Header>
 
       <Button mode="contained" onPress={() => navigation.navigate('Login')}>
         Login with email

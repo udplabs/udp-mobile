@@ -13,6 +13,7 @@ const CustomWebView = ({ route, navigation }) => {
   const { uri, onGoBack, login } = route.params;
 
   navigationChange = async (state) => {
+    console.log('url---', state.url);
     setIsLoading(false);
     if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
       let regex = /[?#]([^=#]+)=([^&#]*)/g;

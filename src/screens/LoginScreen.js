@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useContext } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,11 +12,11 @@ import Header from '../components/Header';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
 import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
+import { AppContext } from '../AppContextProvider';
 import { emailValidator, passwordValidator } from '../core/utils';
-import configFile from '../../samples.config';
 
 const LoginScreen = ({ navigation }) => {
+  const { config, theme } = useContext(AppContext);
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const [fingerprint, setFingerprint] = useState(null);
@@ -31,7 +31,7 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
     setLoading(true);
-    axios.post(`${configFile.baseUri}/authn`, {
+    axios.post(`${config.baseUri}/authn`, {
       username: email.value,
       password: password.value
     }, {
@@ -49,7 +49,7 @@ const LoginScreen = ({ navigation }) => {
           const { stateToken } =  response.data;
           const factorId = _embedded.factors[0].id;
           
-          axios.post(`${configFile.baseUri}/authn/factors/${factorId}/verify`, {
+          axios.post(`${config.baseUri}/authn/factors/${factorId}/verify`, {
             stateToken,
           })
             .then(verifyResponse => {
@@ -66,7 +66,7 @@ const LoginScreen = ({ navigation }) => {
                     {
                       text: "OK",
                       onPress: passCode => {
-                        axios.post(`${configFile.baseUri}/authn/factors/${factorId}/verify`, {
+                        axios.post(`${config.baseUri}/authn/factors/${factorId}/verify`, {
                           stateToken,
                           passCode,
                         })
@@ -157,7 +157,7 @@ const LoginScreen = ({ navigation }) => {
   };
   
   _onWebLoginPressed = () => {
-    const uri = `${configFile.authUri}?client_id=${configFile.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}`;
+    const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}`;
     navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
   }
 
@@ -256,7 +256,7 @@ const LoginScreen = ({ navigation }) => {
             <TouchableOpacity
               onPress={() => navigation.navigate('ForgotPassword')}
             >
-              <Text style={styles.label}>Forgot your password?</Text>
+              <Text style={{ color: theme.colors.secondary }}>Forgot your password?</Text>
             </TouchableOpacity>
           </View>
 
@@ -273,9 +273,9 @@ const LoginScreen = ({ navigation }) => {
           </Button>
           
           <View style={styles.row}>
-            <Text style={styles.label}>Don’t have an account? </Text>
+            <Text style={{ color: theme.colors.secondary }}>Don’t have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.link}>Sign up</Text>
+              <Text style={[styles.link, {color: theme.colors.primary}]}>Sign up</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -299,12 +299,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 4,
   },
-  label: {
-    color: theme.colors.secondary,
-  },
   link: {
     fontWeight: 'bold',
-    color: theme.colors.primary,
   },
   spinnerTextStyle: {
     color: '#FFF',

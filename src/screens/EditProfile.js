@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useContext } from 'react';
 import { View, Alert, StyleSheet, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,11 +14,10 @@ import {
   nameValidator,
   phoneNumberValidator,
 } from '../core/utils';
-import configFile from '../../samples.config';
-
-
+import { AppContext } from '../AppContextProvider';
 
 const EditProfileScreen = ({ route, navigation }) => {
+  const { config } = useContext(AppContext);
   const [userId, setUserId] = useState(null);
   const [firstName, setFirstName] = useState({ value: '', error: '' });
   const [lastName, setLastName] = useState({ value: '', error: '' });
@@ -60,13 +59,13 @@ const EditProfileScreen = ({ route, navigation }) => {
     getIdStatus();
   }, [route.pararms]);
 
-  uploadID = () => {
+  function uploadID () {
     const { accessToken } = route.params;
     if(accessToken) {
       setLoading(true);
-      axios.post(`${configFile.customAPIUrl}/evidentio/token`, {
-        subdomain: configFile.udp_subdomain,
-        app: configFile.app_name,
+      axios.post(`${config.customAPIUrl}/evidentio/token`, {
+        subdomain: config.udp_subdomain,
+        app: config.app_name,
       }, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -100,10 +99,10 @@ const EditProfileScreen = ({ route, navigation }) => {
     const { accessToken } = route.params;
     const id = await AsyncStorage.getItem('@uploadedID');
     setLoading(true);
-    axios.post(`${configFile.customAPIUrl}/evidentio/updateidentity`, {
+    axios.post(`${config.customAPIUrl}/evidentio/updateidentity`, {
       evident_id: id,
-      subdomain: configFile.udp_subdomain,
-      app: configFile.app_name,
+      subdomain: config.udp_subdomain,
+      app: config.app_name,
     }, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -144,7 +143,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setLoading(true);
       // Checking if the user accepted the permission
       
-      axios.get(`${configFile.customAPIUrl}/proxy/${configFile.udp_subdomain}/users/${userId}`, {
+      axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }}
@@ -198,7 +197,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setPage(1);
     } else if(page === 1) {
       setLoading(true);
-      axios.put(`${configFile.customAPIUrl}/proxy/${configFile.udp_subdomain}/users/${userId}`, {
+      axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
         profile: {
           ...user,
           firstName: firstName.value,

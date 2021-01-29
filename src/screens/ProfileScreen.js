@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useState, memo, useContext, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -18,79 +18,30 @@ import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
 import Error from '../components/Error';
-import { theme } from '../core/theme';
-import configFile from '../../samples.config';
+import { AppContext } from '../AppContextProvider';
 
 const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 const useWebKit = Platform.OS === 'ios';
 
-export class ProfileScreen extends React.Component {
-  constructor(props) {
-    super(props);
+const ProfileScreen = ({ route, navigation }) => {
+  const { theme, config } = useContext(AppContext);
+  const [accessToken, setAccessToken] = useState(null);
+  const [user, setUser] = useState(null);
+  const [progress, setProgress] = useState(false);
+  const [error, setError] = useState('');
+  const [userId, setUserId] = useState(null);
 
-    this.state = {
-      accessToken: null,
-      user: null,
-      progress: false,
-      error: '',
-      userId: null,
-      loading: 0,
-    };
-  }
-
-  async componentDidMount() {
-    const { navigation } = this.props;
-
-    const accessToken = await AsyncStorage.getItem('@accessToken');
+  async function loadProfile () {
     if(accessToken) {
-      this.setState({ accessToken }, async () => {
-        let userId = await AsyncStorage.getItem('@userId');
-        if(!userId) {
-          const result =  jwt.decode(accessToken).claimsSet;
-          userId = result.uid;
-        }
-        this.setState({ userId }, async () => {
-          // Checking if the user accepted the permissio
-          await this.loadProfile();
-          navigation.addListener('focus', this.loadProfile);
-        });
-      });
-    } else {
-      const sessionToken = await AsyncStorage.getItem('@sessionToken');
-      const uri = `${configFile.authUri}?client_id=${configFile.clientId}&response_type=token&scope=openid&redirect_uri=${configFile.authUri}/callback&state=customstate&nonce=${configFile.nonce}&&sessionToken=${sessionToken}`;
-      console.log('loading webview from profile', uri);
-      navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
-    }
-  }
-
-  onSignInSuccess = async (state) => {
-    if(state) {
-      await this.loadProfile();
-    } else {
-      Alert.alert(
-        'Error',
-        'An error has occured, please try again later.',
-        [
-          { text: 'OK', onPress: () => this.logout() }
-        ],
-        { cancelable: false }
-      );
-    }
-  }
-
-  loadProfile = async () => {
-    const { navigation } = this.props;
-    const { accessToken, userId } = this.state;
-    if(accessToken) {
-      this.setState({ progress: true });
-      axios.get(`${configFile.customAPIUrl}/proxy/${configFile.udp_subdomain}/users/${userId}`, {
+      setProgress(true);
+      axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }}
       )
       .then(response => {
         const { data } = response;
-        if(!data.profile[configFile.consentField]) {
+        if(!data.profile[config.consentField]) {
           Alert.alert(
             'Terms and Conditions',
             termsText,
@@ -98,10 +49,10 @@ export class ProfileScreen extends React.Component {
               {
                 text: 'Agree',
                 onPress: async () => {
-                  this.setState({ progress: true });
+                  setProgress(true);
                   const newProfile = data.profile;
-                  newProfile[configFile.consentField] = true;
-                  axios.put(`${configFile.customAPIUrl}/proxy/${configFile.udp_subdomain}/users/${userId}`, {
+                  newProfile[config.consentField] = true;
+                  axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
                     profile: newProfile
                   }, {
                     headers: {
@@ -109,26 +60,28 @@ export class ProfileScreen extends React.Component {
                     }
                   })
                   .then(response => {
-                    this.setState({ progress: false, user: response.data.profile });
+                    setProgress(false);
+                    setUser(response.data.profile);
                   })
                   .catch((error) => {
                     Alert.alert(
                       'Error',
                       'An error has occured, please try again.',
                       [
-                        { text: 'OK', onPress: () => {this.setState({ progress: false, user: data.profile })} }
+                        { text: 'OK', onPress: () => setProgress(false)}
                       ],
                       { cancelable: false }
                     );
                   })
                 }
               },
-              { text: 'Disagree', onPress: () => this.logout(), style: 'cancel'}
+              { text: 'Disagree', onPress: () => logout(), style: 'cancel'}
             ],
             { cancelable: false }
           );
         } else {
-          this.setState({ progress: false, user: data.profile });
+          setProgress(false);
+          setUser(data.profile);
         }
       }
       ,(e) => {
@@ -139,27 +92,64 @@ export class ProfileScreen extends React.Component {
             'Session has expired. Please try to login again',
             [
               { text: 'OK', onPress: async () => {
-                this.logout();
+                logout();
               }
               }
             ]
           );
         } else {
-          this.setState({ progress: false, error: e.message });
+          setProgress(false);
+          setError(e.message);
         }
       })
     }
   }
 
-  transactionalMFA = async () => {
-    const { navigation } = this.props;
-    const { accessToken, user, userId } = this.state;
+  useEffect(() => {
+    async function initialLoad() {
+      const accessToken = await AsyncStorage.getItem('@accessToken');
+      if(accessToken) {
+        setAccessToken(accessToken)
+        let userId = await AsyncStorage.getItem('@userId');
+        if(!userId) {
+          const result =  jwt.decode(accessToken).claimsSet;
+          userId = result.uid;
+        }
+        setUserId(userId);
+        await loadProfile();
+        navigation.addListener('focus', loadProfile);
+      } else {
+        const sessionToken = await AsyncStorage.getItem('@sessionToken');
+        const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
+        console.log('loading webview from profile', uri);
+        navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
+      }
+    }
+    initialLoad();
+  }, [accessToken]);
 
+  onSignInSuccess = async (state) => {
+    if(state) {
+      await loadProfile();
+    } else {
+      Alert.alert(
+        'Error',
+        'An error has occured, please try again later.',
+        [
+          { text: 'OK', onPress: () => logout() }
+        ],
+        { cancelable: false }
+      );
+    }
+  }
+
+  
+
+  transactionalMFA = async () => {
     navigation.navigate('Transaction', { accessToken, user, userId });
   }
 
   logout = async () => {
-    const { navigation } = this.props;
  
     CookieManager.clearAll(useWebKit)
       .then((success) => {
@@ -184,59 +174,54 @@ export class ProfileScreen extends React.Component {
       });
   }
 
-  render() {
-    const { navigation } = this.props;
-    const { user, accessToken, error, progress, userId } = this.state;
-
-    return (
-      <Background>
-        
-        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
-          <View style={styles.container}>
-            <View style={styles.headerRow}>
-              <Header>Profile</Header>
-              <Button style={{ flexDirection: 'row' }} onPress={() => navigation.navigate('EditProfile', { user, userId, accessToken })}>Edit</Button>
-            </View>
-            
-            <Spinner
-              visible={progress}
-              textContent={'Loading...'}
-              textStyle={styles.spinnerTextStyle}
-            />
-            <Error error={error} />
-            { user && (
-              <View style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                <Text style={styles.titleHello}>Welcome {user.firstName}</Text>
-                <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
-                <Text style={styles.titleDetails}>Email: {user.email}</Text>
-                {
-                  user.primaryPhone && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
-                }
-              </View>
-            )}
-            <View style={{ flexDirection: 'column', marginTop: 20 }}>
-              
-              { accessToken &&
-                <View style={styles.tokenContainer}>
-                  <Text style={styles.tokenTitle}>Access Token:</Text>
-                  <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
-                </View>
-              }
+  return (
+    <Background>
+      
+      <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
+        <View style={styles.container}>
+          <View style={styles.headerRow}>
+            <Header>Profile</Header>
+            <Button style={{ flexDirection: 'row' }} onPress={() => navigation.navigate('EditProfile', { user, userId, accessToken })}>Edit</Button>
+          </View>
+          
+          <Spinner
+            visible={progress}
+            textContent={'Loading...'}
+            textStyle={styles.spinnerTextStyle}
+          />
+          <Error error={error} />
+          { user && (
+            <View style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+              <Text style={[styles.titleHello, { color: theme.colors.secondary }]}>Welcome {user.firstName}</Text>
+              <Text style={styles.titleDetails}>Name: {`${user.firstName} ${user.lastName}`}</Text>
+              <Text style={styles.titleDetails}>Email: {user.email}</Text>
               {
-                accessToken && <Button style={{ marginTop: 40 }} onPress={this.transactionalMFA} >Transactions</Button>
+                user.primaryPhone && <Text style={styles.titleDetails}>Phone Number: {user.primaryPhone}</Text>
               }
-             
-              <View style={styles.row}>
-                <Button onPress={this.logout} mode="outlined">
-                  Logout
-                </Button>
+            </View>
+          )}
+          <View style={{ flexDirection: 'column', marginTop: 20 }}>
+            
+            { accessToken &&
+              <View style={styles.tokenContainer}>
+                <Text style={styles.tokenTitle}>Access Token:</Text>
+                <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
               </View>
+            }
+            {
+              accessToken && <Button style={{ marginTop: 40 }} onPress={transactionalMFA} >Transactions</Button>
+            }
+            
+            <View style={styles.row}>
+              <Button onPress={logout} mode="outlined">
+                Logout
+              </Button>
             </View>
           </View>
-        </ScrollView>
-      </Background>
-    );
-  }
+        </View>
+      </ScrollView>
+    </Background>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -258,7 +243,6 @@ const styles = StyleSheet.create({
   titleHello: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme.colors.secondary,
     paddingTop: 40
   },
   titleDetails: {
@@ -275,3 +259,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
 });
+
+export default memo(ProfileScreen);

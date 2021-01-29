@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import ConfirmGoogleCaptcha from 'react-native-google-recaptcha-v2';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -9,19 +9,18 @@ import Header from '../components/Header';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
 import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
+import { AppContext } from '../AppContextProvider';
 import {
   emailValidator,
   passwordValidator,
   nameValidator,
   phoneNumberValidator,
 } from '../core/utils';
-import configFile from '../../samples.config';
-
-const siteKey = configFile.reCaptchaSiteKey;
-const baseUrl = configFile.reCaptchaBaseUrl;
 
 const RegisterScreen = ({ navigation }) => {
+  const { config, theme } = useContext(AppContext);
+  const siteKey = config.reCaptchaSiteKey;
+  const baseUrl = config.reCaptchaBaseUrl;
   const [firstName, setFirstName] = useState({ value: '', error: '' });
   const [lastName, setLastName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
@@ -38,7 +37,7 @@ const RegisterScreen = ({ navigation }) => {
         console.log('Verified code from Google', event.nativeEvent.data);
         setTimeout(() => {
           captchaForm.hide();
-          const url = `${configFile.customAPIUrl}/proxy/${configFile.udp_subdomain}/users?activate=true`;
+          const url = `${config.customAPIUrl}/proxy/${config.udp_subdomain}/users?activate=true`;
           setLoading(true);
           axios.post(url, {
             profile: {
@@ -183,9 +182,9 @@ const RegisterScreen = ({ navigation }) => {
             </Button>
 
             <View style={styles.row}>
-              <Text style={styles.label}>Already have an account? </Text>
+              <Text style={{ color: theme.colors.secondary }}>Already have an account? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.link}>Login</Text>
+                <Text style={[ styles.link, {color: theme.colors.primary}]}>Login</Text>
               </TouchableOpacity>
             </View>
             <ConfirmGoogleCaptcha
@@ -207,9 +206,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 30,
   },
-  label: {
-    color: theme.colors.secondary,
-  },
   button: {
     marginTop: 24,
   },
@@ -219,7 +215,6 @@ const styles = StyleSheet.create({
   },
   link: {
     fontWeight: 'bold',
-    color: theme.colors.primary,
   },
   spinnerTextStyle: {
     color: '#FFF',

@@ -1,13 +1,16 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { StyleSheet, Text } from 'react-native';
-import { theme } from '../core/theme';
+import { AppContext } from '../AppContextProvider';
 
-const Header = ({ children }) => <Text style={styles.header}>{children}</Text>;
+const Header = ({ children }) => {
+  const { theme } = useContext(AppContext);
+  return <Text style={[styles.header, { color: theme.colors.primary }]}>{children}</Text>
+};
 
 const styles = StyleSheet.create({
   header: {
     fontSize: 26,
-    color: theme.colors.primary,
+
     fontWeight: 'bold',
     paddingVertical: 14,
   },

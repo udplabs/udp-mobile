@@ -1,32 +1,30 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { TextInput as Input } from 'react-native-paper';
-import { theme } from '../core/theme';
+import { AppContext } from '../AppContextProvider';
 
-const TextInput = ({ errorText, ...props }) => (
-  <View style={styles.container}>
+const TextInput = ({ errorText, ...props }) => {
+  const { theme } = useContext(AppContext);
+  return <View style={styles.container}>
     <Input
-      style={styles.input}
+      style={{ backgroundColor: theme.colors.surface }}
       selectionColor={theme.colors.primary}
       underlineColor="transparent"
       mode="outlined"
       {...props}
     />
-    {errorText ? <Text style={styles.error}>{errorText}</Text> : null}
+    {errorText ? <Text style={[styles.error, {color: theme.colors.error}]}>{errorText}</Text> : null}
   </View>
-);
+};
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
     marginVertical: 12,
   },
-  input: {
-    backgroundColor: theme.colors.surface,
-  },
   error: {
     fontSize: 14,
-    color: theme.colors.error,
+    
     paddingHorizontal: 4,
     paddingTop: 4,
   },
