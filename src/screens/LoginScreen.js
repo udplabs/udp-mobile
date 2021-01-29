@@ -1,6 +1,6 @@
 import React, { memo, useState, useContext } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-
+import prompt from 'react-native-prompt-android';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -54,7 +54,7 @@ const LoginScreen = ({ navigation }) => {
           })
             .then(verifyResponse => {
               if(verifyResponse.data.factorResult === 'CHALLENGE') {
-                Alert.prompt(
+                prompt(
                   "Enter passcode",
                   "A verification email with passcode was sent to your email. Please input the passcode here.",
                   [
@@ -105,8 +105,11 @@ const LoginScreen = ({ navigation }) => {
                             );
                           })
                       }
-                    }
+                    },
                   ],
+                  {
+                    keyboardType: 'numeric'
+                  }
                 );
               }
             })
