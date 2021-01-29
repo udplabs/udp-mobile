@@ -67,7 +67,7 @@ const App = () => {
       if(Platform.OS === 'android') {
         const SharedPreferences = require('react-native-shared-preferences');
         SharedPreferences.setName('prefs.db');
-        SharedPreferences.getItems(['clientId', 'issuer', 'udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl', 'primaryColor', 'secondaryColor', 'errorColor'], function(values){
+        SharedPreferences.getItems(['clientId', 'issuer', 'udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMfaClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl', 'primaryColor', 'secondaryColor', 'errorColor'], function(values){
           clientId = (values[0] && values[0] !== 'null') ? values[0] : clientId;
           issuer = (values[1] && values[1] !== 'null') ? values[1] : issuer;
           udp_subdomain = (values[2] && values[2] !== 'null') ? values[2] : udp_subdomain;
