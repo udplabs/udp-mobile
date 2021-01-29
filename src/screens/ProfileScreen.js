@@ -23,6 +23,7 @@ import { AppContext } from '../AppContextProvider';
 const termsText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 const useWebKit = Platform.OS === 'ios';
 
+let unsubscribe;
 const ProfileScreen = ({ navigation }) => {
   const { theme, config } = useContext(AppContext);
   const [accessToken, setAccessToken] = useStateWithCallbackLazy(null);
@@ -32,7 +33,6 @@ const ProfileScreen = ({ navigation }) => {
   const [userId, setUserId] = useStateWithCallbackLazy(null);
 
   async function loadProfile (accessToken, userId) {
-    console.log('load---')
     if(accessToken && userId) {
       setProgress(true);
       axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
@@ -107,9 +107,7 @@ const ProfileScreen = ({ navigation }) => {
   }
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', async () => {
-      await loadProfile(accessToken, userId);
-    });
+    
     return unsubscribe;
   }, [navigation]);
 
@@ -124,6 +122,11 @@ const ProfileScreen = ({ navigation }) => {
         }
         setUserId(userId, async (currentId) => {
           await loadProfile(accessToken, userId);
+          unsubscribe = navigation.addListener('focus', async () => {
+            const accessToken = await AsyncStorage.getItem('@accessToken');
+            const userId = await AsyncStorage.getItem('@userId');
+            await loadProfile(accessToken, userId);
+          });
         });
       });
      

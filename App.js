@@ -67,7 +67,7 @@ const App = () => {
       if(Platform.OS === 'android') {
         const SharedPreferences = require('react-native-shared-preferences');
         SharedPreferences.setName('prefs.db');
-        SharedPreferences.getItems(['clientId', 'issuer',' udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl', 'primaryColor', 'secondaryColor', 'errorColor'], function(values){
+        SharedPreferences.getItems(['clientId', 'issuer', 'udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMFAClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl', 'primaryColor', 'secondaryColor', 'errorColor'], function(values){
           clientId = (values[0] && values[0] !== 'null') ? values[0] : clientId;
           issuer = (values[1] && values[1] !== 'null') ? values[1] : issuer;
           udp_subdomain = (values[2] && values[2] !== 'null') ? values[2] : udp_subdomain;
@@ -81,7 +81,7 @@ const App = () => {
           nonce = (values[6] && values[6] !== 'null') ? values[6] :  nonce;
           const transactionalMfaClientId = (values[7] && values[7] !== 'null') ? values[7] :  transactionalMFA.clientId;
           consentField = (values[8] && values[8] !== 'null') ? values[8] :  consentField;
-          const facebookIDP = (values[9] && values[9] !== 'null') ? values[3] :  facebook;
+          const facebookIDP = (values[9] && values[9] !== 'null') ? values[9] :  facebook;
           const googleIDP = (values[10] && values[10] !== 'null') ? values[10] :  google;
           const appleIDP = (values[11] && values[11] !== 'null') ? values[11] :  apple;
           title = (values[12] && values[12] !== 'null') ? values[12] :  title;
