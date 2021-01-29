@@ -34,7 +34,8 @@
     "react-native-shared-preferences": "^1.0.2",
     "react-native-status-bar-height": "^2.6.0",
     "react-native-vector-icons": "^7.1.0",
-    "react-native-webview": "^11.0.2"
+    "react-native-webview": "^11.0.2",
+    "use-state-with-callback": "^2.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

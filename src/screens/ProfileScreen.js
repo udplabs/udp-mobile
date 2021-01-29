@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
-
+import { useStateWithCallbackLazy } from 'use-state-with-callback';
 import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
@@ -25,14 +25,14 @@ const useWebKit = Platform.OS === 'ios';
 
 const ProfileScreen = ({ route, navigation }) => {
   const { theme, config } = useContext(AppContext);
-  const [accessToken, setAccessToken] = useState(null);
+  const [accessToken, setAccessToken] = useStateWithCallbackLazy(null);
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(false);
   const [error, setError] = useState('');
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useStateWithCallbackLazy(null);
 
-  async function loadProfile () {
-    if(accessToken) {
+  async function loadProfile (accessToken, userId) {
+    if(accessToken && userId) {
       setProgress(true);
       axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
         headers: {
@@ -106,31 +106,39 @@ const ProfileScreen = ({ route, navigation }) => {
   }
 
   useEffect(() => {
-    async function initialLoad() {
-      const accessToken = await AsyncStorage.getItem('@accessToken');
-      if(accessToken) {
-        setAccessToken(accessToken)
+    const unsubscribe = navigation.addListener('focus', async () => {
+      await loadProfile(accessToken, userId);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  async function initialLoad() {
+    const accessToken = await AsyncStorage.getItem('@accessToken');
+    if(accessToken) {
+      setAccessToken(accessToken, async (currentToken) => {
         let userId = await AsyncStorage.getItem('@userId');
         if(!userId) {
           const result =  jwt.decode(accessToken).claimsSet;
           userId = result.uid;
         }
-        setUserId(userId);
-        await loadProfile();
-        navigation.addListener('focus', loadProfile);
-      } else {
-        const sessionToken = await AsyncStorage.getItem('@sessionToken');
-        const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
-        console.log('loading webview from profile', uri);
-        navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
-      }
+        setUserId(userId, async (currentId) => {
+          await loadProfile(accessToken, userId);
+        });
+      });
+     
+    } else {
+      const sessionToken = await AsyncStorage.getItem('@sessionToken');
+      const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
+      console.log('loading webview from profile', uri);
+      navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
     }
-    initialLoad();
-  }, [accessToken]);
+  }
+
+  initialLoad();
 
   onSignInSuccess = async (state) => {
     if(state) {
-      await loadProfile();
+      await initialLoad();
     } else {
       Alert.alert(
         'Error',

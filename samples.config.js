@@ -1,20 +1,24 @@
 import { Settings, Platform } from 'react-native';
 
-let clientId = '0oawm2hmyuw13qQmK0h7';
-let issuer = 'https://udp-zeelabs-stg-73e.oktapreview.com/oauth2/auswm2id0kJEYONpc0h7';
-let udp_subdomain = 'zeelabs-stg';
-let app_name = 'react-native';
-let title = 'ZeeLabs Demo';
+let clientId = '0oavf6s8badHjoMgT0h7';
+let issuer = 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/default';
+let udp_subdomain = 'udp-mobile';
+let app_name = 'udp-mobile';
+let title = 'UDP React Native Demo';
+
 let logoUrl = '';
 let customAPIUrl = 'https://j8d461nbhb.execute-api.us-east-2.amazonaws.com/dev';
-let reCaptchaSiteKey = '6LcXsz0aAAAAAD3cjzrrrKZ1WNp4Jvsu1p_p0s7A';
+let reCaptchaSiteKey = '6LfQExQaAAAAAKOtmshnR544I5qQkp-vfYJ2TGyL';
+
 let nonce = '52b839be-3b79-4d09-a933-ef04bd34491f';
-let transactionalMfaClientId = '0oawm2o5u9pjzVwFY0h7';
-let consentField = 'zeelabs_stg_react_native_demo_consent_flag';
-let facebookIDP = '0oawmcz70tA4hTBdX0h7';
+let transactionalMfaClientId = '0oaw9qibcih6mwAiI0h7';
+let consentField = 'udp_mobile_react_native_demo_consent_flag';
+let facebookIDP = '0oavyrdmiygFJn4GX0h7';
+
 let googleIDP = '0oaw402206kWFqFPj0h7';
 let appleIDP = '0oaw729qicIxZkUtN0h7';
-let reCaptchaBaseUrl = 'https://udp-zeelabs-stg-73e.oktapreview.com';
+let reCaptchaBaseUrl = 'https://udp-udp-mobile-6aa.oktapreview.com';
+
 
 if(Platform.OS === 'ios') {
   clientId = Settings.get('clientId') || clientId;
