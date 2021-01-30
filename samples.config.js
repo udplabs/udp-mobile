@@ -18,7 +18,10 @@ let facebookIDP = '0oavyrdmiygFJn4GX0h7';
 let googleIDP = '0oaw402206kWFqFPj0h7';
 let appleIDP = '0oaw729qicIxZkUtN0h7';
 let reCaptchaBaseUrl = 'https://udp-udp-mobile-6aa.oktapreview.com';
-
+const codeChallengeMethod = 'S256';
+const codeChallenge = 'qjrzSW9gMiUgpUvqgEPE4_-8swvyCtfOVvg55o5S_es';
+const codeVerifier = 'M25iVXpKU3puUjFaYWg3T1NDTDQtcW1ROUY5YXlwalNoc0hhakxifmZHag';
+let isAppetize = true;
 
 if(Platform.OS === 'ios') {
   clientId = Settings.get('clientId') || clientId;
@@ -39,6 +42,7 @@ if(Platform.OS === 'ios') {
   appleIDP = Settings.get('appleIDP') || appleIDP;
   title = Settings.get('title') || title;
   logoUrl = Settings.get('logoUrl') || logoUrl;
+  isAppetize = Settings.get('isAppetize');
 }
 
 const splitArray = issuer.split('/');
@@ -66,4 +70,8 @@ export default {
     google: googleIDP,
     apple: appleIDP,
   },
+  codeChallengeMethod,
+  codeChallenge,
+  codeVerifier,
+  isAppetize,
 };

@@ -155,8 +155,6 @@ const ProfileScreen = ({ navigation }) => {
     }
   }
 
-  
-
   transactionalMFA = async () => {
     navigation.navigate('Transaction', { accessToken, user, userId });
   }
@@ -168,8 +166,8 @@ const ProfileScreen = ({ navigation }) => {
         console.log('CookieManager.clearAll =>', success);
         AsyncStorage.getAllKeys()
         .then(keys => {
-          if(keys.indexOf('@acceptedUsers') > -1) {
-            keys.splice(keys.indexOf('@acceptedUsers'), 1);
+          if(keys.indexOf('@refreshToken') > -1) {
+            keys.splice(keys.indexOf('@refreshToken'), 1);
           }
           AsyncStorage.multiRemove(keys);
         })

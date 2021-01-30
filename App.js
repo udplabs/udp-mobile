@@ -67,7 +67,7 @@ const App = () => {
       if(Platform.OS === 'android') {
         const SharedPreferences = require('react-native-shared-preferences');
         SharedPreferences.setName('prefs.db');
-        SharedPreferences.getItems(['clientId', 'issuer', 'udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMfaClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl', 'primaryColor', 'secondaryColor', 'errorColor'], function(values){
+        SharedPreferences.getItems(['clientId', 'issuer', 'udp_subdomain', 'app_name', 'customAPIUrl', 'reCaptchaSiteKey', 'nonce', 'transactionalMfaClientId', 'consentField', 'facebookIDP', 'googleIDP', 'appleIDP', 'title', 'logoUrl', 'primaryColor', 'secondaryColor', 'errorColor', 'isAppetize'], function(values){
           clientId = (values[0] && values[0] !== 'null') ? values[0] : clientId;
           issuer = (values[1] && values[1] !== 'null') ? values[1] : issuer;
           udp_subdomain = (values[2] && values[2] !== 'null') ? values[2] : udp_subdomain;
@@ -89,10 +89,11 @@ const App = () => {
           const primaryColor = (values[14] && values[14] !== 'null') ? values[14] : oldTheme.colors.primary;
           const secondaryColor = (values[15] && values[15] !== 'null') ? values[15] : oldTheme.colors.secondary;
           const errorColor = (values[16] && values[16] !== 'null') ? values[16] : oldTheme.colors.error;
-
+          const isAppetize = (values[17] !== 'null') && values[17];
           baseUri = `${splitArray[0]}//${splitArray[2]}/api/v1`;
           authUri = `${issuer}/v1/authorize`;
           changeConfig({
+            ...sampleConfig,
             app_name,
             clientId,
             title,
@@ -113,6 +114,7 @@ const App = () => {
               google: googleIDP,
               apple: appleIDP,
             },
+            isAppetize,
           })
           changeTheme({
             ...DefaultTheme,
