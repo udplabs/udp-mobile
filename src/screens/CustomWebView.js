@@ -18,12 +18,9 @@ const CustomWebView = ({ route, navigation }) => {
   const { uri, onGoBack, mode } = route.params;
 
   navigationChange = async (state) => {
-    console.log('here----', state.url);
     if(mode === 'auth') {
       if(state.url.indexOf('/authorize/callback?code') >= 0) {
-        
         setIsVisible(false);
-        console.log('visibility', isVisible);
         let regex = /[?#]([^=#]+)=([^&#]*)/g;
         let params = {};
         while ((match = regex.exec(state.url))) {
@@ -103,7 +100,7 @@ const CustomWebView = ({ route, navigation }) => {
         Close
       </Button>
       
-      <View style={{ display: isVisible ? 'flex' : 'none' }}>
+      <View style={{ visibility: isVisible ? 'visible' : 'hidden', flex: 1 }}>
         <WebView
           onLoad={(event) => navigationChange(event.nativeEvent)}
           source={{ uri }}
