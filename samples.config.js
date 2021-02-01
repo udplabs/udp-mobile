@@ -1,27 +1,26 @@
 import { Settings, Platform } from 'react-native';
 
-let clientId = '0oavf6s8badHjoMgT0h7';
-let issuer = 'https://udp-udp-mobile-6aa.oktapreview.com/oauth2/default';
-let udp_subdomain = 'udp-mobile';
-let app_name = 'udp-mobile';
-let title = 'UDP React Native Demo';
+let clientId = '0oawq7rprj3EF1h1N0h7';
+let issuer = 'https://udp-zeelabs-stg-73e.oktapreview.com/oauth2/default'
+let udp_subdomain = 'zeelabs-stg';
+let app_name = 'react-native-ios';
+let title = 'React Native Demo';
 
-let logoUrl = '';
+let logoUrl = 'https://oktabuilt-dev-public.s3.us-east-2.amazonaws.com/assets/android/Okta.png';
 let customAPIUrl = 'https://j8d461nbhb.execute-api.us-east-2.amazonaws.com/dev';
-let reCaptchaSiteKey = '6LfQExQaAAAAAKOtmshnR544I5qQkp-vfYJ2TGyL';
+let reCaptchaSiteKey = '';
 
 let nonce = '52b839be-3b79-4d09-a933-ef04bd34491f';
-let transactionalMfaClientId = '0oaw9qibcih6mwAiI0h7';
-let consentField = 'udp_mobile_react_native_demo_consent_flag';
-let facebookIDP = '0oavyrdmiygFJn4GX0h7';
+let transactionalMfaClientId = '0oawq7s7iproeEwrO0h7';
+let consentField = 'zeelabs_stg_react_native_demo_consent_flag';
+let facebookIDP = '0oawmcz70tA4hTBdX0h7';
 
-let googleIDP = '0oaw402206kWFqFPj0h7';
-let appleIDP = '0oaw729qicIxZkUtN0h7';
-let reCaptchaBaseUrl = 'https://udp-udp-mobile-6aa.oktapreview.com';
+let googleIDP = '';
+let appleIDP = '';
+let reCaptchaBaseUrl = '';
 const codeChallengeMethod = 'S256';
 const codeChallenge = 'qjrzSW9gMiUgpUvqgEPE4_-8swvyCtfOVvg55o5S_es';
 const codeVerifier = 'M25iVXpKU3puUjFaYWg3T1NDTDQtcW1ROUY5YXlwalNoc0hhakxifmZHag';
-let isAppetize = true;
 
 if(Platform.OS === 'ios') {
   clientId = Settings.get('clientId') || clientId;
@@ -42,7 +41,6 @@ if(Platform.OS === 'ios') {
   appleIDP = Settings.get('appleIDP') || appleIDP;
   title = Settings.get('title') || title;
   logoUrl = Settings.get('logoUrl') || logoUrl;
-  isAppetize = Settings.get('isAppetize');
 }
 
 const splitArray = issuer.split('/');
@@ -73,5 +71,4 @@ export default {
   codeChallengeMethod,
   codeChallenge,
   codeVerifier,
-  isAppetize,
 };
