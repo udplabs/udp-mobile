@@ -8,7 +8,7 @@ let title = 'React Native Demo';
 
 let logoUrl = 'https://oktabuilt-dev-public.s3.us-east-2.amazonaws.com/assets/android/Okta.png';
 let customAPIUrl = 'https://j8d461nbhb.execute-api.us-east-2.amazonaws.com/dev';
-let reCaptchaSiteKey = '';
+let reCaptchaSiteKey = '6LcXsz0aAAAAAD3cjzrrrKZ1WNp4Jvsu1p_p0s7A';
 
 let nonce = '52b839be-3b79-4d09-a933-ef04bd34491f';
 let transactionalMfaClientId = '0oawq7s7iproeEwrO0h7';
@@ -17,7 +17,7 @@ let facebookIDP = '0oawmcz70tA4hTBdX0h7';
 
 let googleIDP = '';
 let appleIDP = '';
-let reCaptchaBaseUrl = '';
+let reCaptchaBaseUrl = 'https://udp-zeelabs-stg-73e.oktapreview.com/oauth2';
 const codeChallengeMethod = 'S256';
 const codeChallenge = 'qjrzSW9gMiUgpUvqgEPE4_-8swvyCtfOVvg55o5S_es';
 const codeVerifier = 'M25iVXpKU3puUjFaYWg3T1NDTDQtcW1ROUY5YXlwalNoc0hhakxifmZHag';
