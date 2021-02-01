@@ -95,6 +95,7 @@ const App = () => {
             ...sampleConfig,
             app_name,
             clientId,
+            issuer,
             title,
             logoUrl,
             baseUri,
