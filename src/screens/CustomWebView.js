@@ -18,8 +18,11 @@ const CustomWebView = ({ route, navigation }) => {
   const { uri, onGoBack, mode } = route.params;
 
   navigationChange = async (state) => {
+    
     if(mode === 'auth') {
+      console.log('onload---', state.url);
       if(state.url.indexOf('/authorize/callback?code') >= 0) {
+        
         setIsVisible(false);
         let regex = /[?#]([^=#]+)=([^&#]*)/g;
         let params = {};
@@ -60,8 +63,9 @@ const CustomWebView = ({ route, navigation }) => {
       }
     }
     else {
+      setIsLoading(false);
       if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
-        setIsLoading(false);
+        
         let regex = /[?#]([^=#]+)=([^&#]*)/g;
         let params = {};
         while ((match = regex.exec(state.url))) {
@@ -73,13 +77,12 @@ const CustomWebView = ({ route, navigation }) => {
         onGoBack(true);
         navigation.goBack();
       } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
-        setIsLoading(false);
         await AsyncStorage.removeItem('@accessToken');
         navigation.goBack();
       }
     }
   }
-
+ 
   return (
     <View style={{
       height: height - 55,
@@ -99,17 +102,15 @@ const CustomWebView = ({ route, navigation }) => {
       >
         Close
       </Button>
-      
-      <View style={{ visibility: isVisible ? 'visible' : 'hidden', flex: 1 }}>
-        <WebView
-          onLoad={(event) => navigationChange(event.nativeEvent)}
-          source={{ uri }}
-        />
-      </View>
       {
         isLoading && <ActivityIndicator size="large" />
       }
-    
+      <View style={{ visibility: isVisible ? 'visible' : 'hidden', flex: 1 }}>
+        <WebView
+          onLoadStart={(event) => navigationChange(event.nativeEvent)}
+          source={{ uri }}
+        />
+      </View>
     </View>
   );
 };
