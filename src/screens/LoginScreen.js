@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
+import CookieManager from '@react-native-cookies/cookies';
 
 import Logo from '../components/Logo';
 import Background from '../components/Background';
@@ -15,12 +16,12 @@ import BackButton from '../components/BackButton';
 import { AppContext } from '../AppContextProvider';
 import { emailValidator, passwordValidator } from '../core/utils';
 
+const useWebKit = Platform.OS === 'ios';
 
 const LoginScreen = ({ navigation }) => {
   const { config, theme } = useContext(AppContext);
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
-  const [fingerprint, setFingerprint] = useState(null);
   const [loading, setLoading] = useState(false);
   const _onLoginPressed = () => {
     const emailError = emailValidator(email.value);
@@ -39,7 +40,6 @@ const LoginScreen = ({ navigation }) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        ...fingerprint && { 'X-Device-Fingerprint': fingerprint }
       }
     })
       .then(async response => {
@@ -162,51 +162,123 @@ const LoginScreen = ({ navigation }) => {
   
   _onWebLoginPressed = () => {
     //const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}`;
-    const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}`;
-
-    navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true, mode: 'refresh' });
+    CookieManager.clearAll(useWebKit)
+    .then((success) => {
+      const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}`;
+      navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), mode: 'auth' });
+    });
   }
 
   const _onTouchIDPressed = async () => {
-    const { available, biometryType } = await ReactNativeBiometrics.isSensorAvailable()
-    
-    if (biometryType === ReactNativeBiometrics.TouchID || biometryType === ReactNativeBiometrics.Biometrics) {
-      ReactNativeBiometrics.createKeys('Confirm fingerprint')
-      .then((resultObject) => {
-        const { publicKey } = resultObject
-
-        let epochTimeSeconds = Math.round((new Date()).getTime() / 1000).toString()
-        let payload = epochTimeSeconds + 'some message'
-        ReactNativeBiometrics.createSignature({
-          promptMessage: 'Sign in',
-          payload,
-        })  
-        .then((resultObject) => {
-          const { success, signature } = resultObject
-
-          if (success) {
-            console.log(signature)
-            setFingerprint(signature);
-            _onLoginPressed();
-
-          }
-        })
-        .catch((error) => {
-          console.log('biometrics failed---', error);
-        })
-      })
-    }
-    else {
+    const refreshToken = await AsyncStorage.getItem('@refreshToken');
+  
+    if(!refreshToken) {
       Alert.alert(
         'Error',
-        'Touch ID is not supported.',
+        'No previous sessions exist. You have to login first.',
         [
           { text: 'OK', onPress: () => {} }
         ],
         { cancelable: false }
       );
+    } else {
+      const { available, biometryType } = await ReactNativeBiometrics.isSensorAvailable();
+      // if (biometryType === ReactNativeBiometrics.TouchID || biometryType === ReactNativeBiometrics.Biometrics) {
+      //   ReactNativeBiometrics.createKeys('signin')
+      //   .then((resultObject) => {
+      //     const { publicKey } = resultObject;
+        
+      //     let epochTimeSeconds = Math.round((new Date()).getTime() / 1000).toString()
+      //     let payload = epochTimeSeconds + 'some message'
+      //     ReactNativeBiometrics.createSignature({
+      //       promptMessage: 'Confirm fingerprint',
+      //       payload,
+      //     })
+      //       .then(async (resultObject) => {
+      //         const { success, signature } = resultObject
+  
+      //         if (success) {
+      //           await refreshSession();
+      //         }
+      //       })
+      //       .catch((error) => {
+      //         Alert.alert(
+      //           'Error',
+      //           'Something went wrong, please try again.',
+      //           [
+      //             { text: 'OK', onPress: () => {console.log('createKeyError--', error)} }
+      //           ],
+      //           { cancelable: false }
+      //         );
+      //       })
+      //   });
+      // } else {
+        ReactNativeBiometrics.simplePrompt({
+          promptMessage: 'Confirm fingerprint'
+        })
+          .then(async (resultObject) => {
+            const { success } = resultObject
+        
+            if (success) {
+              await refreshSession();
+            } else {
+              Alert.alert(
+                'Error',
+                'Something went wrong, please try again.',
+              );
+            }
+          })
+          .catch((error) => {
+            Alert.alert(
+              'Error',
+              'Something went wrong, please try again.',
+            );
+          })
+          
+      //}
     }
   }
+
+  refreshSession = async () => {
+    const refreshToken = await AsyncStorage.getItem('@refreshToken');
+    const uri = `${config.issuer}/v1/token?grant_type=refresh_token&client_id=${config.clientId}&redirect_uri=${config.authUri}/callbac&scope=openid%20offline_access&refresh_token=${refreshToken}`;
+    setLoading(true);
+    axios.post(uri, {
+    }, {
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/x-www-form-urlencoded',
+        'Cookie': `JSESSIONID=B70B6FD0E2A1CF2F00AC83629045FC18`,
+      }
+    })
+    .then(async(response) => {
+      setLoading(false);
+      const { access_token, refresh_token } = response.data;
+      await AsyncStorage.setItem('@accessToken', access_token);
+      await AsyncStorage.setItem('@refreshToken', refresh_token);
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Profile',
+          },
+        ],
+      })
+    })
+    .catch(error => {
+      setLoading(false);
+      console.log('error--', error);
+      const errorMsg = error && error.response && error.response.data && error.response.data.errorSummary ? error.response.data.errorSummary : 'An error has occured, please try again.';
+      Alert.alert(
+        'Error',
+        errorMsg,
+        [
+          { text: 'OK', onPress: () => {} }
+        ],
+        { cancelable: false }
+      );
+    })
+}
 
   onSignInSuccess = (state) => {
     if(state) {
@@ -275,7 +347,7 @@ const LoginScreen = ({ navigation }) => {
           </Button>
 
           <Button mode="contained" onPress={_onTouchIDPressed}>
-            Authenticate with Touch ID
+            Login with Fingerprint
           </Button>
           
           <View style={styles.row}>

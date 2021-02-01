@@ -113,7 +113,7 @@ const TransactionScreen = ({ route, navigation }) => {
       setAmount({ ...amount, error: 'You have to specify the amount'});
     } else {
       const uri = `${config.authUri}?client_id=${config.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status), login: false }, );
+      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status)} );
     }
   }
 

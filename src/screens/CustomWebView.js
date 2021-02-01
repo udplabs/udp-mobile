@@ -1,5 +1,5 @@
 import React, { memo, useState, useContext } from 'react';
-import { View, Dimensions, ActivityIndicator } from 'react-native'
+import { View, Dimensions, ActivityIndicator, Alert } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,11 +14,16 @@ const height = Dimensions.get('window').height;
 const CustomWebView = ({ route, navigation }) => {
   const { config } = useContext(AppContext);
   const [isLoading, setIsLoading] = useState(true);
-  const { uri, onGoBack, login, mode } = route.params;
+  const [isVisible, setIsVisible] = useState(true);
+  const { uri, onGoBack, mode } = route.params;
 
   navigationChange = async (state) => {
-    if(mode === 'refresh') {
+    console.log('here----', state.url);
+    if(mode === 'auth') {
       if(state.url.indexOf('/authorize/callback?code') >= 0) {
+        
+        setIsVisible(false);
+        console.log('visibility', isVisible);
         let regex = /[?#]([^=#]+)=([^&#]*)/g;
         let params = {};
         while ((match = regex.exec(state.url))) {
@@ -26,15 +31,18 @@ const CustomWebView = ({ route, navigation }) => {
         }
         const { code } = params;
         const uri = `${config.issuer}/v1/token?grant_type=authorization_code&client_id=${config.clientId}&redirect_uri=${config.authUri}/callback&code=${code}&code_verifier=${config.codeVerifier}`;
+        setIsLoading(true);
+        
         axios.post(uri, {
         }, {
           headers: {
             'accept': 'application/json',
             'content-type': 'application/x-www-form-urlencoded',
             'cache-control': 'no-cache',
-        }}
-        )
+          }
+        })
         .then(async(response) => {
+          setIsLoading(false);
           const { access_token, refresh_token } = response.data;
           await AsyncStorage.setItem('@accessToken', access_token);
           await AsyncStorage.setItem('@refreshToken', refresh_token);
@@ -42,23 +50,29 @@ const CustomWebView = ({ route, navigation }) => {
           navigation.goBack();
         })
         .catch(error => {
-          console.log('error', error.response.data);
+          setIsLoading(false);
+          Alert.alert(
+            'Error',
+            'Something went wrong, please try again.',
+            [
+              { text: 'OK', onPress: () =>  console.log('error', error) }
+            ],
+            { cancelable: false }
+          );
         })
-
       }
     }
     else {
       if(state.url.indexOf('/authorize/callback#access_token') >= 0) {
+        setIsLoading(false);
         let regex = /[?#]([^=#]+)=([^&#]*)/g;
         let params = {};
         while ((match = regex.exec(state.url))) {
           params[match[1]] = match[2]
         }
         const { access_token } = params;
-        if(login) {
-          await AsyncStorage.setItem('@accessToken', access_token);
-        }
-        setIsLoading(false);
+        await AsyncStorage.setItem('@accessToken', access_token);
+    
         onGoBack(true);
         navigation.goBack();
       } else if(state.url.indexOf('/authorize/callback#state') >= 0) {
@@ -88,13 +102,16 @@ const CustomWebView = ({ route, navigation }) => {
       >
         Close
       </Button>
+      
+      <View style={{ display: isVisible ? 'flex' : 'none' }}>
+        <WebView
+          onLoad={(event) => navigationChange(event.nativeEvent)}
+          source={{ uri }}
+        />
+      </View>
       {
         isLoading && <ActivityIndicator size="large" />
       }
-      <WebView
-        onLoadStart={(event) => navigationChange(event.nativeEvent)}
-        source={{ uri }}
-      />
     
     </View>
   );
@@ -103,13 +120,13 @@ const CustomWebView = ({ route, navigation }) => {
 const Stack = createStackNavigator();
 
 export default function WebViewStack({ route }) {
-  const { uri, onGoBack, login, mode } = route.params;
+  const { uri, onGoBack, mode } = route.params;
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }}}
       mode="modal"
     >
-      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, onGoBack, login, mode }} />
+      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, onGoBack, mode }} />
     </Stack.Navigator>
   )
 }

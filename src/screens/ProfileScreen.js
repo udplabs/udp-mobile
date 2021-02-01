@@ -119,6 +119,7 @@ const ProfileScreen = ({ navigation }) => {
         if(!userId) {
           const result =  jwt.decode(accessToken).claimsSet;
           userId = result.uid;
+          await AsyncStorage.setItem('@userId', userId);
         }
         setUserId(userId, async (currentId) => {
           await loadProfile(accessToken, userId);
@@ -132,9 +133,12 @@ const ProfileScreen = ({ navigation }) => {
      
     } else {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
-      const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
-      console.log('loading webview from profile', uri);
-      navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), login: true });
+      //const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
+      const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}&sessionToken=${sessionToken}`;
+      CookieManager.clearAll(useWebKit)
+      .then((success) => {
+        navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), mode: 'auth' });
+      });
     }
   }
 
@@ -160,28 +164,24 @@ const ProfileScreen = ({ navigation }) => {
   }
 
   logout = async () => {
- 
-    CookieManager.clearAll(useWebKit)
-      .then((success) => {
-        console.log('CookieManager.clearAll =>', success);
-        AsyncStorage.getAllKeys()
-        .then(keys => {
-          if(keys.indexOf('@refreshToken') > -1) {
-            keys.splice(keys.indexOf('@refreshToken'), 1);
-          }
-          AsyncStorage.multiRemove(keys);
-        })
-        .then(() => {
-          navigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: 'Home',
-              },
-            ],
-          })
-        });
-      });
+    AsyncStorage.getAllKeys()
+    .then(keys => {
+      if(keys.indexOf('@refreshToken') > -1) {
+        keys.splice(keys.indexOf('@refreshToken'), 1);
+      }
+      AsyncStorage.multiRemove(keys);
+    })
+    .then(() => {
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Home',
+          },
+        ],
+      })
+    });
+      
   }
 
   return (

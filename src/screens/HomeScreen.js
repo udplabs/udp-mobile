@@ -1,14 +1,20 @@
 import React, { memo, useContext } from 'react';
+import CookieManager from '@react-native-cookies/cookies';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import { AppContext } from '../AppContextProvider';
 
+const useWebKit = Platform.OS === 'ios';
+
 const HomeScreen = ({ navigation }) => {
   const { config } = useContext(AppContext);
   _onFacebookLogin = async () => {
-    navigation.navigate('SocialLoginModal', { mode: 'facebook'});
+    CookieManager.clearAll(useWebKit)
+    .then((success) => {
+      navigation.navigate('SocialLoginModal', { mode: 'facebook'});
+    });
   }
 
   // _onGoogleLogin = async () => {
@@ -16,7 +22,10 @@ const HomeScreen = ({ navigation }) => {
   // }
 
   _onAppleLogin = async () => {
-    navigation.navigate('SocialLoginModal', { mode: 'apple'});
+    CookieManager.clearAll(useWebKit)
+    .then((success) => {
+      navigation.navigate('SocialLoginModal', { mode: 'apple'});
+    });
   }
 
   return (
