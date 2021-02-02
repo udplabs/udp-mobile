@@ -1,21 +1,15 @@
-# Okta React Native Custom Sign In Example
+# Okta React Native Authentication Demo
 
-This example shows you how to use the [Okta React Native SDK](https://github.com/okta/okta-oidc-js/tree/master/packages/okta-react-native) to adopt Okta Authentication flow in your app.
+This example demonstrates various Okta Authentication features in your app.
 
 ## Clone repo
 To run this application, you first need to clone this repo and then enter into this directory:
 
-```bash
-git clone git@github.com:okta/samples-js-react-native.git
-cd samples-js-react-native/custom-sign-in
-```
-
 ## Install dependencies
 
-### Install JS dependencies
-Install dependencies based on package-lock.json
+Install dependencies based on package.json
 ```bash
-npm ci
+npm install
 ```
 
 ### Install CocoaPods dependencies
@@ -34,14 +28,15 @@ npm start
 Launch an Android Emulator or iOS Simulator, then
 ```bash
 # Android
-npm run android
+react-native run-android
 
 # iOS
-npm run ios
+react-native run-ios
 ```
 
 ## Using This Example
 
 Enter your credentials and tap the **Login** button. You can login with the same account that you created when signing up for your Developer Org, or you can use a known username and password from your Okta Directory.
 
-After you complete the login flow, you will be able to see the details of user's account. Tap **Get Access Token** button to excahnge session token to access token via OIDC SDK.
+After you complete the login flow, you will be able to see the details of user's account.
+You can also test editing profile, a demo transaction with MFA, and uploading ID for verification.
