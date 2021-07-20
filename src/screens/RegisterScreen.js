@@ -18,6 +18,7 @@ import {
 } from '../core/utils';
 
 const RegisterScreen = ({ navigation }) => {
+  let captchaForm;
   const { config, theme } = useContext(AppContext);
   const siteKey = config.reCaptchaSiteKey;
   const baseUrl = config.reCaptchaBaseUrl;
@@ -28,7 +29,7 @@ const RegisterScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState({ value: '', error: '' });
   const [loading, setLoading] = useState(false);
 
-  onMessage = event => {
+  const onMessage = event => {
     if (event && event.nativeEvent.data) {
       if (['cancel', 'error', 'expired'].includes(event.nativeEvent.data)) {
         captchaForm.hide();
@@ -37,7 +38,7 @@ const RegisterScreen = ({ navigation }) => {
         console.log('Verified code from Google', event.nativeEvent.data);
         setTimeout(() => {
           captchaForm.hide();
-          const url = `${config.customAPIUrl}/proxy/${config.udp_subdomain}/users?activate=true`;
+          const url = `http://localhost:8080/api/users?activate=true`;
           setLoading(true);
           axios.post(url, {
             profile: {
@@ -150,7 +151,7 @@ const RegisterScreen = ({ navigation }) => {
               textContentType="emailAddress"
               keyboardType="email-address"
             />
-            <TextInput
+            {/* <TextInput
               keyboardType="numeric"
               returnKeyType="next"
               label="Mobile number"
@@ -166,7 +167,7 @@ const RegisterScreen = ({ navigation }) => {
                     setPhoneNumber({ value: num, error: ''})}  
                 }
               }
-            />
+            /> */}
 
             <TextInput
               label="Password"
@@ -190,7 +191,7 @@ const RegisterScreen = ({ navigation }) => {
             <ConfirmGoogleCaptcha
               ref={_ref => captchaForm = _ref}
               siteKey={siteKey}
-              baseUrl={baseUrl}
+              baseUrl={'https://google.com'}
               languageCode='en'
               onMessage={onMessage}
             />

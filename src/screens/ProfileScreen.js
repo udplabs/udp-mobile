@@ -27,6 +27,7 @@ let unsubscribe;
 const ProfileScreen = ({ navigation }) => {
   const { theme, config } = useContext(AppContext);
   const [accessToken, setAccessToken] = useStateWithCallbackLazy(null);
+  const [idToken, setIdToken] = useState(null);
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(false);
   const [error, setError] = useState('');
@@ -35,13 +36,14 @@ const ProfileScreen = ({ navigation }) => {
   async function loadProfile (accessToken, userId) {
     if(accessToken && userId) {
       setProgress(true);
-      axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
+      axios.get(`${config.customAPIUrl}/api/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }}
       )
       .then(response => {
         const { data } = response;
+        console.log(data)
         if(!data.profile[config.consentField]) {
           Alert.alert(
             'Terms and Conditions',
@@ -53,7 +55,7 @@ const ProfileScreen = ({ navigation }) => {
                   setProgress(true);
                   const newProfile = data.profile;
                   newProfile[config.consentField] = true;
-                  axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
+                  axios.post(`${config.customAPIUrl}/api/users/${userId}/register`, {
                     profile: newProfile
                   }, {
                     headers: {
@@ -65,6 +67,8 @@ const ProfileScreen = ({ navigation }) => {
                     setUser(response.data.profile);
                   })
                   .catch((error) => {
+                    console.log(error)
+
                     Alert.alert(
                       'Error',
                       'An error has occured, please try again.',
@@ -80,6 +84,8 @@ const ProfileScreen = ({ navigation }) => {
             ],
             { cancelable: false }
           );
+          setUser(data.profile);
+          console.log(user)
         } else {
           setProgress(false);
           setUser(data.profile);
@@ -109,11 +115,11 @@ const ProfileScreen = ({ navigation }) => {
   useEffect(() => {
     
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, user]);
 
   async function initialLoad() {
     const accessToken = await AsyncStorage.getItem('@accessToken');
-    if(accessToken) {
+    if (accessToken) {
       setAccessToken(accessToken, async (currentToken) => {
         let userId = await AsyncStorage.getItem('@userId');
         if(!userId) {
@@ -130,21 +136,25 @@ const ProfileScreen = ({ navigation }) => {
           });
         });
       });
-     
+      const idToken = await AsyncStorage.getItem('@idToken');
+      setIdToken(idToken);
     } else {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
       //const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
       const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}&sessionToken=${sessionToken}`;
+      console.log('making session token exchange');
       CookieManager.clearAll(useWebKit)
       .then((success) => {
         navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), mode: 'auth' });
-      });
+      })
+      .catch(console.error)
     }
   }
 
   initialLoad();
 
   onSignInSuccess = async (state) => {
+    console.log(state);
     if(state) {
       await initialLoad();
     } else {
@@ -186,7 +196,6 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <Background>
-      
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
         <View style={styles.container}>
           <View style={styles.headerRow}>
@@ -211,11 +220,20 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           )}
           <View style={{ flexDirection: 'column', marginTop: 20 }}>
-            
             { accessToken &&
+            <View>
               <View style={styles.tokenContainer}>
                 <Text style={styles.tokenTitle}>Access Token:</Text>
                 <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
+              </View>
+
+            </View>
+            }
+            { 
+              idToken && 
+              <View style={styles.tokenContainer}>
+                <Text style={styles.tokenTitle}>ID Token Decoded:</Text>
+                <Text style={{ marginTop: 20 }}>{JSON.stringify(jwt.decode(idToken).claimsSet, null, 2)}</Text>
               </View>
             }
             {
@@ -245,7 +263,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 50,
     flexDirection: 'column',
     width: '100%',
     paddingVertical: 30,

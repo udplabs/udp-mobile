@@ -20,16 +20,6 @@ const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const date = new Date();
-const history = [
-  {
-    detail: `Ending balance as of ${date.toDateString()}`,
-    balance: 5689,
-  },
-  {
-    detail: `Available balance`,
-    balance: 5129,
-  }
-];
 const accounts = [
   {
     value: 0,
@@ -67,6 +57,17 @@ const requiredFields = [
 const successMessage = 'Transaction has been successfully authorized.';
 
 const TransactionScreen = ({ route, navigation }) => {
+  const [history, setHistory] = useState([
+    {
+      detail: `Ending balance as of ${date.toDateString()}`,
+      balance: 5689,
+    },
+    {
+      detail: `Available balance`,
+      balance: 5129,
+    }
+  ]);
+  const [transactionHistory, setTransactionHistory] = useState([]);
   const { config, theme } = useContext(AppContext);
   const [fromAccount, setFromAccount] = useState(accounts[0].value);
   const [toAccount, setToAccount] = useState(accounts[1].value);
@@ -108,26 +109,60 @@ const TransactionScreen = ({ route, navigation }) => {
     }
   }, [route.params]);
 
-  onPayment = () => {
+  const onPayment = () => {
     if(!amount.value || parseFloat(amount.value) <= 0) {
       setAmount({ ...amount, error: 'You have to specify the amount'});
     } else {
+      if (parseFloat(amount.value) <= 50) {
+        return sendTransaction({ sent: amount.value });
+      }
+      // Require step up over 50
       const uri = `${config.authUri}?client_id=${config.transactionalMFA.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}`;
-      navigation.navigate('CustomWebView', { uri, onGoBack: (status) => displayBanner(status)} );
+      console.log(uri);
+      navigation.navigate('CustomWebView', { uri, onGoBack: (status, details) => displayBanner(status, {...details, data: { sent: amount.value }})} );
     }
   }
 
-  displayBanner = (status) => {
-    if(status) {
+  const sendTransaction = (transaction) => {
+    const { sent } = transaction;
+
+      const historyCopy = history.concat();
+      historyCopy[1].balance = history[1].balance - sent;
+      setHistory(historyCopy);
+
+      const transactionHistoryCopy = transactionHistory.concat();
+      const now = new Date();
+      transactionHistoryCopy.unshift({
+        date: `${now.getMonth()}/${now.getDay()}/${now.getFullYear()}`,
+        description: 'Account Transfer',
+        amount: sent,
+      });
+      setTransactionHistory(transactionHistoryCopy);
+  
       Alert.alert(
-        'Success',
+        '✅ Success',
         successMessage,
         [
           { text: 'OK', onPress: () => {} }
         ],
         { cancelable: false }
       );
+  }
+
+  const displayBanner = (status, details) => {
+    if(status) {
+      sendTransaction(details.data);
     } else {
+      if (details && details.action === 'CLOSED_WINDOW') {
+        return Alert.alert(
+          '⚠️ Transaction Cancelled',
+          'MFA verification required to send money',
+          [
+            { text: 'OK', onPress: () => {} }
+          ],
+          { cancelable: false }
+        );
+      }
       Alert.alert(
         'Failure',
         'An error has occured.',
@@ -139,7 +174,7 @@ const TransactionScreen = ({ route, navigation }) => {
     }
   }
 
-  changeModalValues = (name, text) => {
+  const changeModalValues = (name, text) => {
     switch(name) {
       case 'zipCode':
         setModalValues({...modalValues, zipCode: { value: text, error: '' } });
@@ -156,10 +191,10 @@ const TransactionScreen = ({ route, navigation }) => {
     }
   }
 
-  onUpdateProfile = () => {
+  const onUpdateProfile = () => {
     const { accessToken, userId, user } = route.params;
     setLoading(true);
-    axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
+    axios.post(`${config.customAPIUrl}/api/users/${userId}/register`, {
       profile: {
         ...user,
         ...modalValues.zipCode.value && { zipCode: modalValues.zipCode.value },
@@ -250,6 +285,19 @@ const TransactionScreen = ({ route, navigation }) => {
                         <View key={item.detail} style={styles.row}>
                           <Text style={styles.itemDetail}>{item.detail}</Text>
                           <Text style={[styles.amount, {color: theme.colors.primary}]}>{`$${item.balance}`}</Text>
+                        </View>
+                      ))
+                    }
+                  </View>
+
+                  <View style={styles.panel}>
+                    <Title>Recent Activity</Title>
+                    <Subheading>Most Recent Transactions</Subheading>
+                    {
+                      transactionHistory.slice(0, 5).map((item, index)=> (
+                        <View key={`${item.date}-${item.amount}-${index}`} style={[styles.row, { justifyContent: 'space-between', flexDirection: 'row', marginTop: 5, alignItems: 'center'}]}>
+                          <Text style={[styles.itemDetail, { marginTop: 0}]}>{item.date} - {item.description}</Text>
+                          <Text style={[styles.amount, {color: theme.colors.primary, marginTop: 0}]}>{`$${item.amount}`}</Text>
                         </View>
                       ))
                     }

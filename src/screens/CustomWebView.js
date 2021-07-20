@@ -42,14 +42,17 @@ const CustomWebView = ({ route, navigation }) => {
           }
         })
         .then(async(response) => {
+          console.log('Token Request Response:', response);
           setIsLoading(false);
-          const { access_token, refresh_token } = response.data;
+          const { access_token, refresh_token, id_token } = response.data;
           await AsyncStorage.setItem('@accessToken', access_token);
+          await AsyncStorage.setItem('@idToken', id_token);
           await AsyncStorage.setItem('@refreshToken', refresh_token);
           onGoBack(true);
           navigation.goBack();
         })
         .catch(error => {
+          console.log(error);
           setIsLoading(false);
           Alert.alert(
             'Error',
@@ -94,7 +97,10 @@ const CustomWebView = ({ route, navigation }) => {
       backgroundColor: 'white',
     }}>
       <Button
-        onPress={() => navigation.goBack()}
+        onPress={() => {
+          onGoBack(false, { action: 'CLOSED_WINDOW' });
+          navigation.goBack()
+        }}
         style={{
           flexDirection: 'row',
           justifyContent: 'flex-end',

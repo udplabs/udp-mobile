@@ -143,7 +143,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setLoading(true);
       // Checking if the user accepted the permission
       
-      axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
+      axios.get(`${config.customAPIUrl}/api/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }}
@@ -197,7 +197,7 @@ const EditProfileScreen = ({ route, navigation }) => {
       setPage(1);
     } else if(page === 1) {
       setLoading(true);
-      axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
+      axios.post(`${config.customAPIUrl}/api/users/${userId}/register`, {
         profile: {
           ...user,
           firstName: firstName.value,
