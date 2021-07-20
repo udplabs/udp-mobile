@@ -1,6 +1,6 @@
 import React, { memo, useContext } from 'react';
 import CookieManager from '@react-native-cookies/cookies';
-import { Image } from 'react-native';
+import { Image, View } from 'react-native';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -31,10 +31,12 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <Background>
+      <Image style={{position: 'absolute'}} resizeMode='contain' source={require('../assets/bg_city.jpeg')}/>
       <Logo />
-      <Image
-          style={{width: '100%', height: 54, marginBottom: 10}}
-          source={require('../assets/bank_logo.png')} />
+        <Image
+            style={{width: 200, height: 34, marginBottom: 20, marginTop: 10}}
+            source={require('../assets/bank_logo.png')} />
+     
 
       <Button mode="contained" onPress={() => navigation.navigate('Login')}>
         Login with email

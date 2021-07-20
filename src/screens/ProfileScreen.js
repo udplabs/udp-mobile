@@ -6,6 +6,7 @@ import {
   View,
   ScrollView,
   Platform,
+  ActivityIndicator
 } from 'react-native';
 import jwt from 'jwt-lite';
 import CookieManager from '@react-native-cookies/cookies';
@@ -32,6 +33,7 @@ const ProfileScreen = ({ navigation }) => {
   const [progress, setProgress] = useState(false);
   const [error, setError] = useState('');
   const [userId, setUserId] = useStateWithCallbackLazy(null);
+  const [isLoading, setLoading] = useState(true);
 
   async function loadProfile (accessToken, userId) {
     if(accessToken && userId) {
@@ -142,12 +144,11 @@ const ProfileScreen = ({ navigation }) => {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
       //const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
       const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}&sessionToken=${sessionToken}`;
-      console.log('making session token exchange');
       CookieManager.clearAll(useWebKit)
-      .then((success) => {
-        navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), mode: 'auth' });
-      })
-      .catch(console.error)
+        .then((success) => {
+          navigation.navigate('CustomWebView', { uri, visible: false, onGoBack: (state) => onSignInSuccess(state), mode: 'auth' });
+        })
+        .catch(console.error)
     }
   }
 
@@ -167,6 +168,8 @@ const ProfileScreen = ({ navigation }) => {
         { cancelable: false }
       );
     }
+
+    setLoading(false)
   }
 
   transactionalMFA = async () => {
@@ -194,7 +197,12 @@ const ProfileScreen = ({ navigation }) => {
       
   }
 
-  return (
+  return (isLoading) ? 
+    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+      <Text style={{color: '#aaaaaa', marginBottom: 20}}>Loading...</Text>
+      <ActivityIndicator size="large" />
+    </View>
+     : (
     <Background>
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
         <View style={styles.container}>
