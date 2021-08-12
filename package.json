@@ -19,7 +19,7 @@
     "events": "^3.2.0",
     "jwt-lite": "^2.1.0",
     "react": "17.0.1",
-    "react-native": "0.63.3",
+    "react-native": "0.64.1",
     "react-native-biometrics": "^2.1.4",
     "react-native-gesture-handler": "1.8.0",
     "react-native-google-recaptcha-v2": "^1.1.0",
