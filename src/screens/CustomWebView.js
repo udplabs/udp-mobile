@@ -43,8 +43,9 @@ const CustomWebView = ({ route, navigation }) => {
         })
         .then(async(response) => {
           setIsLoading(false);
-          const { access_token, refresh_token } = response.data;
+          const { access_token, refresh_token, id_token } = response.data;
           await AsyncStorage.setItem('@accessToken', access_token);
+          await AsyncStorage.setItem('@idToken', id_token);
           await AsyncStorage.setItem('@refreshToken', refresh_token);
           onGoBack(true);
           navigation.goBack();
