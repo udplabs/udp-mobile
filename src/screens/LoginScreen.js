@@ -164,7 +164,7 @@ const LoginScreen = ({ navigation }) => {
     //const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}`;
     CookieManager.clearAll(useWebKit)
     .then((success) => {
-      const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}`;
+      const uri = `${config.authUri}?client_id=${config.clientId}&response_type=code&scope=openid%20offline_access%20profile&redirect_uri=${config.authUri}/callback&state=customstate&code_challenge_method=${config.codeChallengeMethod}&code_challenge=${config.codeChallenge}`;
       navigation.navigate('CustomWebView', { uri, onGoBack: (state) => onSignInSuccess(state), mode: 'auth' });
     });
   }
