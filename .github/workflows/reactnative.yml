@@ -25,6 +25,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm run lint
+    # Active when get time to address
+    # - run: npm run lint
     # Not implemented
     # - run: npm test
