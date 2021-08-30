@@ -13,7 +13,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
-import { useStateWithCallbackLazy } from 'use-state-with-callback';
 import Header from '../components/Header';
 import Background from '../components/Background';
 import Button from '../components/Button';
@@ -26,15 +25,16 @@ const useWebKit = Platform.OS === 'ios';
 let unsubscribe;
 const ProfileScreen = ({ navigation }) => {
   const { theme, config } = useContext(AppContext);
-  const [accessToken, setAccessToken] = useStateWithCallbackLazy(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [idToken, setIdToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [progress, setProgress] = useState(false);
+  const [loading, setloading] = useState(true);
   const [error, setError] = useState('');
-  const [userId, setUserId] = useStateWithCallbackLazy(null);
+  const [userId, setUserId] = useState(null);
 
   async function loadProfile (accessToken, userId) {
-    if(accessToken && userId) {
-      setProgress(true);
+    if (accessToken && userId) {
+      setloading(true);
       axios.get(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
@@ -50,7 +50,7 @@ const ProfileScreen = ({ navigation }) => {
               {
                 text: 'Agree',
                 onPress: async () => {
-                  setProgress(true);
+                  setloading(true);
                   const newProfile = data.profile;
                   newProfile[config.consentField] = true;
                   axios.put(`${config.customAPIUrl}/proxy/${config.udp_subdomain}/users/${userId}`, {
@@ -61,7 +61,7 @@ const ProfileScreen = ({ navigation }) => {
                     }
                   })
                   .then(response => {
-                    setProgress(false);
+                    setloading(false);
                     setUser(response.data.profile);
                   })
                   .catch((error) => {
@@ -69,7 +69,7 @@ const ProfileScreen = ({ navigation }) => {
                       'Error',
                       'An error has occured, please try again.',
                       [
-                        { text: 'OK', onPress: () => setProgress(false)}
+                        { text: 'OK', onPress: () => setloading(false)}
                       ],
                       { cancelable: false }
                     );
@@ -81,7 +81,7 @@ const ProfileScreen = ({ navigation }) => {
             { cancelable: false }
           );
         } else {
-          setProgress(false);
+          setloading(false);
           setUser(data.profile);
         }
       }
@@ -99,7 +99,7 @@ const ProfileScreen = ({ navigation }) => {
             ]
           );
         } else {
-          setProgress(false);
+          setloading(false);
           setError(e.message);
         }
       })
@@ -107,17 +107,16 @@ const ProfileScreen = ({ navigation }) => {
   }
 
   useEffect(() => {
-    
     return unsubscribe;
   }, [navigation]);
 
   async function initialLoad() {
     const accessToken = await AsyncStorage.getItem('@accessToken');
-    if(accessToken) {
+    if (accessToken) {
       setAccessToken(accessToken, async (currentToken) => {
         let userId = await AsyncStorage.getItem('@userId');
         if(!userId) {
-          const result =  jwt.decode(accessToken).claimsSet;
+          const result = jwt.decode(accessToken).claimsSet;
           userId = result.uid;
           await AsyncStorage.setItem('@userId', userId);
         }
@@ -130,7 +129,9 @@ const ProfileScreen = ({ navigation }) => {
           });
         });
       });
-     
+
+      const idToken = await AsyncStorage.getItem('@idToken');
+      setIdToken(idToken);
     } else {
       const sessionToken = await AsyncStorage.getItem('@sessionToken');
       //const uri = `${config.authUri}?client_id=${config.clientId}&response_type=token&scope=openid&redirect_uri=${config.authUri}/callback&state=customstate&nonce=${config.nonce}&&sessionToken=${sessionToken}`;
@@ -141,6 +142,8 @@ const ProfileScreen = ({ navigation }) => {
       })
       .catch(console.warn);
     }
+
+    setloading(false);
   }
 
   initialLoad();
@@ -185,21 +188,23 @@ const ProfileScreen = ({ navigation }) => {
       
   }
 
-  return (
+  return (loading) ?
+    <View centerContent>
+      <Spinner
+        visible
+        textContent={'Loading...'}
+        textStyle={styles.spinnerTextStyle}
+      />
+    </View>
+    :
     <Background>
-      
       <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false} centerContent={true}>
         <View style={styles.container}>
           <View style={styles.headerRow}>
             <Header>Profile</Header>
             <Button style={{ flexDirection: 'row' }} onPress={() => navigation.navigate('EditProfile', { user, userId, accessToken })}>Edit</Button>
           </View>
-          
-          <Spinner
-            visible={progress}
-            textContent={'Loading...'}
-            textStyle={styles.spinnerTextStyle}
-          />
+
           <Error error={error} />
           { user && (
             <View style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}>
@@ -211,12 +216,22 @@ const ProfileScreen = ({ navigation }) => {
               }
             </View>
           )}
-          <View style={{ flexDirection: 'column', marginTop: 20 }}>
-            
+          <View style={{ flexDirection: 'column', marginTop: 10 }}>
             { accessToken &&
-              <View style={styles.tokenContainer}>
-                <Text style={styles.tokenTitle}>Access Token:</Text>
-                <Text style={{ marginTop: 20 }} numberOfLines={5}>{accessToken}</Text>
+              <View style={[styles.tokenContainer, { backgroundColor: '#dbf5f0' }]}>
+                <Text style={styles.tokenTitle}>Access Token</Text>
+                <View style={styles.tokenDecodeContainer}>
+                  <Text style={{color: '#056960'}}>{JSON.stringify(jwt.decode(accessToken).claimsSet, null, 4)}</Text>
+                </View>
+              </View>
+            }
+
+            { idToken && 
+              <View style={[styles.tokenContainer, { backgroundColor: '#d8c7d0'}]}>
+                <Text style={styles.tokenTitle}>ID Token</Text>
+                <View style={styles.tokenDecodeContainer}>
+                  <Text style={{color: '#483941'}}>{JSON.stringify(jwt.decode(idToken).claimsSet, null, 4)}</Text>
+                </View>
               </View>
             }
             {
@@ -232,7 +247,6 @@ const ProfileScreen = ({ navigation }) => {
         </View>
       </ScrollView>
     </Background>
-  );
 }
 
 const styles = StyleSheet.create({
@@ -263,11 +277,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tokenContainer: {
-    marginTop: 20
+    marginTop: 20,
+    padding: 30,
+    borderRadius: 30
+  },
+  tokenDecodeContainer: {
+    marginTop: 15,
   },
   tokenTitle: {
-    fontSize: 16,
-    fontWeight: 'bold'
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#424242'
   },
 });
 
