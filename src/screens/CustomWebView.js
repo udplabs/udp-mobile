@@ -12,14 +12,19 @@ const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const CustomWebView = ({ route, navigation }) => {
+  const { uri, onGoBack, mode, visible = true } = route.params;
+
   const { config } = useContext(AppContext);
   const [isLoading, setIsLoading] = useState(true);
-  const [isVisible, setIsVisible] = useState(true);
-  const { uri, onGoBack, mode } = route.params;
+  const [isVisible, setIsVisible] = useState(visible);
 
   navigationChange = async (state) => {
     
     if(mode === 'auth') {
+      if (state.url.indexOf('sessionToken') >= 0) {
+        setIsVisible(false);
+      }
+
       console.log('onload---', state.url);
       if(state.url.indexOf('/authorize/callback?code') >= 0) {
         
@@ -93,9 +98,13 @@ const CustomWebView = ({ route, navigation }) => {
       borderTopLeftRadius: 10,
       borderTopRightRadius: 10,
       backgroundColor: 'white',
+      display: (isVisible) ? 'flex' : 'none'
     }}>
       <Button
-        onPress={() => navigation.goBack()}
+        onPress={() => {
+          onGoBack(false, { action: 'CLOSED_WINDOW' });
+          navigation.goBack()
+        }}
         style={{
           flexDirection: 'row',
           justifyContent: 'flex-end',
@@ -103,10 +112,11 @@ const CustomWebView = ({ route, navigation }) => {
       >
         Close
       </Button>
-      {
-        isLoading && <ActivityIndicator size="large" />
-      }
-      <View style={{ visibility: isVisible ? 'visible' : 'hidden', flex: 1 }}>
+      <View style={{ flex: 1, display: 'flex' }}>
+        {
+          isLoading && 
+          <ActivityIndicator size="large" />       
+        }
         <WebView
           onLoadStart={(event) => navigationChange(event.nativeEvent)}
           source={{ uri }}
@@ -119,13 +129,13 @@ const CustomWebView = ({ route, navigation }) => {
 const Stack = createStackNavigator();
 
 export default function WebViewStack({ route }) {
-  const { uri, onGoBack, mode } = route.params;
+  const { uri, onGoBack, mode, visible } = route.params;
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' }}}
       mode="modal"
     >
-      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, onGoBack, mode }} />
+      <Stack.Screen name="Modal" component ={memo(CustomWebView)} initialParams={{ uri, onGoBack, mode, visible }} />
     </Stack.Navigator>
   )
 }
